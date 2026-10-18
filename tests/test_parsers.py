@@ -100,3 +100,19 @@ def test_malformed_structures_are_reported_not_crashed(tmp_path, write_json, cap
     write_json('mcp-ok.json', {'mcpServers': {'fetch': {'command': 'uvx', 'args': ['mcp-server-fetch']}}})
     agents = discover([tmp_path])
     assert [a.id for a in agents] == ['mcp-ok'] and 'skipped' in capsys.readouterr().err
+
+
+def test_catalog_classifies_sqlite_brave_search_and_gdrive(tmp_path, write_json):
+    path = write_json('mcp.json', {'mcpServers': {
+        'db': {'command': 'uvx', 'args': ['mcp-server-sqlite==0.6.2', '--db-path', '/data/app.db']},
+        'search': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-brave-search@0.6.2']},
+        'drive': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-gdrive@0.6.2']},
+    }})
+    [agent] = load(path)
+    by_tool = {g.tool: g for g in agent.grants}
+    assert all(g.known for g in agent.grants)
+    assert by_tool['db'].actions == {'read', 'write'}
+    assert by_tool['db'].data_classification == 'confidential'
+    assert by_tool['search'].actions == {'read'} and by_tool['search'].untrusted_input and by_tool['search'].egress
+    assert by_tool['drive'].actions == {'read'}
+    assert by_tool['drive'].data_classification == 'confidential'

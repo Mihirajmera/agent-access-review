@@ -79,6 +79,23 @@ servers:
     actions: [read, write]
     data_classification: internal
 
+  "mcp-server-sqlite":
+    tool: sqlite
+    actions: [read, write]
+    data_classification: confidential
+
+  "@modelcontextprotocol/server-brave-search":
+    tool: search
+    actions: [read]
+    data_classification: public
+    untrusted_input: true
+    egress: true            # search queries leave the organization
+
+  "@modelcontextprotocol/server-gdrive":
+    tool: google-drive
+    actions: [read]
+    data_classification: confidential
+
 # Remote (HTTP/SSE) MCP servers, matched on hostname.
 remote_hosts:
   "api.githubcopilot.com":
