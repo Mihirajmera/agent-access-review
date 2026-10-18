@@ -41,10 +41,23 @@ def is_reference(value: str) -> bool:
             or (v.startswith('<') and v.endswith('>')))
 
 
+class ConfigError(ValueError):
+    """A file in a supported format whose structure isn't what the format requires."""
+
+
 def load(path: Path, source: str | None = None) -> list[Agent]:
     """Parse one file. Returns [] for files that are neither format. `source` is the path recorded
-    in the inventory and evidence (defaults to the path as given)."""
-    source = source or path.as_posix()
+    in the inventory and evidence (defaults to the path as given). Raises ValueError (including
+    ConfigError) or yaml.YAMLError for malformed input, never anything else."""
+    try:
+        return _load(path, source or path.as_posix())
+    except (AttributeError, KeyError, TypeError, RecursionError) as e:
+        # Wrong shapes (a list where an object belongs, a missing id, ...) and absurd nesting
+        # are input problems, not crashes: report them like any other malformed file.
+        raise ConfigError(f'unexpected structure ({type(e).__name__}: {e})') from e
+
+
+def _load(path: Path, source: str) -> list[Agent]:
     text = path.read_text(encoding='utf-8')
     if path.suffix.lower() == '.json':
         data = json.loads(text)
@@ -74,7 +87,7 @@ def discover(paths: list[Path]) -> list[Agent]:
             source = f'{p.name}/{f.relative_to(p).as_posix()}' if p.is_dir() else None
             try:
                 agents.extend(load(f, source))
-            except (ValueError, yaml.YAMLError, KeyError, TypeError) as e:
+            except (ValueError, yaml.YAMLError) as e:
                 # JSON-with-comments configs and unrelated files land here; skip, don't abort the review
                 print(f'warning: skipped {f}: {type(e).__name__}: {e}', file=sys.stderr)
     return agents

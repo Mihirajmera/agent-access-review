@@ -84,3 +84,19 @@ def test_discover_skips_unrelated_and_broken_files(tmp_path, write_json, capsys)
     agents = discover([tmp_path])
     assert [a.source.rsplit('/', 1)[-1] for a in agents] == ['mcp.json']
     assert 'skipped' in capsys.readouterr().err
+
+
+def test_malformed_structures_are_reported_not_crashed(tmp_path, write_json, capsys):
+    from agent_access_review.parsers import ConfigError
+    # Found by fuzzing: a list where a server object belongs used to raise AttributeError,
+    # which aborted the whole scan instead of skipping the one bad file.
+    bad = write_json('mcp.json', {'mcpServers': {'fs': ['npx', 'server-filesystem']}})
+    with pytest.raises(ConfigError, match='unexpected structure'):
+        load(bad)
+    manifest = tmp_path / 'agents.yaml'
+    manifest.write_text('agents:\n  - name: no-id\n', encoding='utf-8')
+    with pytest.raises(ConfigError):
+        load(manifest)
+    write_json('mcp-ok.json', {'mcpServers': {'fetch': {'command': 'uvx', 'args': ['mcp-server-fetch']}}})
+    agents = discover([tmp_path])
+    assert [a.id for a in agents] == ['mcp-ok'] and 'skipped' in capsys.readouterr().err

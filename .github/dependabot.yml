@@ -6,3 +6,9 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule: {interval: weekly}
+  - package-ecosystem: docker
+    directory: /.clusterfuzzlite
+    schedule: {interval: weekly}
+  - package-ecosystem: pip
+    directory: /.clusterfuzzlite
+    schedule: {interval: weekly}
