@@ -57,10 +57,20 @@ def load(path: Path, source: str | None = None) -> list[Agent]:
         raise ConfigError(f'unexpected structure ({type(e).__name__}: {e})') from e
 
 
+def _jsonc(text: str) -> str:
+    """Remove comments and trailing commas, leaving JSON string contents untouched."""
+    string = r'"(?:\\.|[^"\\])*"'
+    text = re.sub(string + r'|//[^\r\n]*|/\*.*?\*/',
+                  lambda m: m[0] if m[0].startswith('"') else re.sub(r'[^\r\n]', ' ', m[0]),
+                  text, flags=re.DOTALL)
+    return re.sub(string + r'|,\s*(?=[}\]])',
+                  lambda m: m[0] if m[0].startswith('"') else m[0][1:], text)
+
+
 def _load(path: Path, source: str) -> list[Agent]:
     text = path.read_text(encoding='utf-8')
     if path.suffix.lower() == '.json':
-        data = json.loads(text)
+        data = json.loads(_jsonc(text))
         servers = data.get('mcpServers', data.get('servers')) if isinstance(data, dict) else None
         if isinstance(servers, dict):
             return [parse_mcp_config(path, data, servers, source)]
@@ -88,7 +98,7 @@ def discover(paths: list[Path]) -> list[Agent]:
             try:
                 agents.extend(load(f, source))
             except (ValueError, yaml.YAMLError) as e:
-                # JSON-with-comments configs and unrelated files land here; skip, don't abort the review
+                # Malformed configs and unrelated files land here; skip, don't abort the review
                 print(f'warning: skipped {f}: {type(e).__name__}: {e}', file=sys.stderr)
     return agents
 
