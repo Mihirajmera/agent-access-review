@@ -42,10 +42,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Build tools come from the hash-locked requirements, so nothing unpinned is fetched.
+      # Build tools come from the default branch's hash-locked requirements (older tags may
+      # predate them), so nothing unpinned is fetched; the code itself comes from the tag.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: tools
+          persist-credentials: false
+
       - name: Build sdist and wheel
         run: |
-          pip install --require-hashes -r requirements.txt
+          pip install --require-hashes -r tools/requirements.txt
           python -c "from setuptools import build_meta as b; b.build_sdist('dist'); b.build_wheel('dist')"
           ls -l dist
 
