@@ -1,0 +1,632 @@
+{
+  "assessment-results": {
+    "uuid": "b160142a-c241-55a4-8270-d5d4c3dd210c",
+    "metadata": {
+      "title": "AI agent access review",
+      "last-modified": "2026-10-19T00:00:00+00:00",
+      "version": "2026-10-19",
+      "oscal-version": "1.1.2"
+    },
+    "import-ap": {
+      "href": "#"
+    },
+    "results": [
+      {
+        "uuid": "2faa4d31-9ad7-5fd5-80ec-9aae0d54e118",
+        "title": "Agent access review as of 2026-10-19",
+        "description": "Automated review of AI agent tool access, credentials and approvals.",
+        "start": "2026-10-19T00:00:00+00:00",
+        "end": "2026-10-19T00:00:00+00:00",
+        "reviewed-controls": {
+          "control-selections": [
+            {
+              "include-controls": [
+                {
+                  "control-id": "ac-2"
+                },
+                {
+                  "control-id": "ac-2.3"
+                },
+                {
+                  "control-id": "ac-4"
+                },
+                {
+                  "control-id": "ac-6"
+                },
+                {
+                  "control-id": "cm-7"
+                },
+                {
+                  "control-id": "cm-8"
+                },
+                {
+                  "control-id": "ia-5"
+                },
+                {
+                  "control-id": "sc-8"
+                },
+                {
+                  "control-id": "sr-3"
+                }
+              ]
+            }
+          ]
+        },
+        "observations": [
+          {
+            "uuid": "0632efc0-44ab-5663-8190-fef81f93db3b",
+            "title": "Access review of MCP host (desktop-commander.json)",
+            "description": "1 tool grants, 6 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "a4904adc-81ae-5ce1-9ba6-529a34a19dce",
+                "type": "component",
+                "title": "MCP host (desktop-commander.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/desktop-commander.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "88ef7e6862613cd0288a03ab4032ffb11aec94d40d1e3afc664cfd95012a3c0d"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "c70e9797-ae81-5156-95bc-f1570b825af8",
+            "title": "Access review of MCP host (fetch.json)",
+            "description": "1 tool grants, 4 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "c797b773-f1c2-56f0-9518-fefc66ead0c4",
+                "type": "component",
+                "title": "MCP host (fetch.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/fetch.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "13225ff84283cf9200ff67df632a2ff0619f30315097e7bdf1d94934af6994ad"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f",
+            "title": "Access review of MCP host (filesystem.json)",
+            "description": "1 tool grants, 5 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "060c9cd8-4385-5eed-a976-709bbe57c3fb",
+                "type": "component",
+                "title": "MCP host (filesystem.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/filesystem.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "b50d3bc183985f479cfbf3aa5e831981f8364907122eb286198bc14c3e456e2f"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "18fc9391-937f-587a-b707-a2b763cca88e",
+            "title": "Access review of MCP host (git.json)",
+            "description": "1 tool grants, 5 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "6920f8b0-374e-52f7-82b1-e980a0d0668f",
+                "type": "component",
+                "title": "MCP host (git.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/git.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "fd5b533504c6909b17babd130ec21e8723d204ad8618e9fc98464e5ad923af5a"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4",
+            "title": "Access review of MCP host (memory.json)",
+            "description": "1 tool grants, 5 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "612dc5b8-8af1-5be0-92d7-e565e4c7a5af",
+                "type": "component",
+                "title": "MCP host (memory.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/memory.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "969951917036ffd5ca3c9c41703f0aba588fc76a19f8f6d13cc1d86bcca18de3"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "2e8a92ac-7621-5d87-943a-3db82d1123ca",
+            "title": "Access review of MCP host (postgres.json)",
+            "description": "1 tool grants, 4 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "e4ec8152-4bab-5187-a1b1-cd01e0bfcab4",
+                "type": "component",
+                "title": "MCP host (postgres.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/postgres.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "a9cd50103c4e2588b94a0846e2fd5c5a20226e2ad3704b707cb5a7b8a4fbabaf"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39",
+            "title": "Access review of MCP host (puppeteer.json)",
+            "description": "1 tool grants, 5 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "7f406443-cda6-5ffb-a7aa-89260a760c03",
+                "type": "component",
+                "title": "MCP host (puppeteer.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/puppeteer.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "f0575ce065ed0f28d028c11df8bec0b5e8d3e2bbad5664511b995cf5f8bc2f9c"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36",
+            "title": "Access review of MCP host (slack.json)",
+            "description": "1 tool grants, 7 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "b6a03c9a-e19d-5d66-af75-8391b15a583d",
+                "type": "component",
+                "title": "MCP host (slack.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/slack.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "b924d24ddcbf49b45221ba110bf1b4e3017070249a36e124139a82102b0535d9"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          },
+          {
+            "uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c",
+            "title": "Access review of MCP host (vscode-github.json)",
+            "description": "1 tool grants, 5 findings.",
+            "methods": [
+              "EXAMINE"
+            ],
+            "types": [
+              "finding"
+            ],
+            "subjects": [
+              {
+                "subject-uuid": "139d902e-f554-5308-8fae-c9ffef7a0656",
+                "type": "component",
+                "title": "MCP host (vscode-github.json)"
+              }
+            ],
+            "relevant-evidence": [
+              {
+                "href": "../evidence/vscode-github.json",
+                "description": "Hashed agent inventory",
+                "props": [
+                  {
+                    "name": "sha256",
+                    "value": "95ed0adb8f3e748c07b285ed0c71456b7bc3047fdbdeee8855d71ede14d78ee1"
+                  }
+                ]
+              }
+            ],
+            "collected": "2026-10-19T00:00:00+00:00"
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "e3cac287-ce4e-52f3-8236-0fb2d9f395ea",
+            "title": "AC-2: AAR-01, AAR-02",
+            "description": "Every agent has an accountable human owner; Agent access is approved and recertified within 90 days",
+            "target": {
+              "type": "objective-id",
+              "target-id": "ac-2",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              },
+              {
+                "observation-uuid": "c70e9797-ae81-5156-95bc-f1570b825af8"
+              },
+              {
+                "observation-uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f"
+              },
+              {
+                "observation-uuid": "18fc9391-937f-587a-b707-a2b763cca88e"
+              },
+              {
+                "observation-uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4"
+              },
+              {
+                "observation-uuid": "2e8a92ac-7621-5d87-943a-3db82d1123ca"
+              },
+              {
+                "observation-uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39"
+              },
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              },
+              {
+                "observation-uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c"
+              }
+            ]
+          },
+          {
+            "uuid": "71d242a6-09db-51e1-83fa-1d91d0a7ddba",
+            "title": "AC-2(3): AAR-08",
+            "description": "Dormant agent access is removed after 90 days",
+            "target": {
+              "type": "objective-id",
+              "target-id": "ac-2.3",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              },
+              {
+                "observation-uuid": "c70e9797-ae81-5156-95bc-f1570b825af8"
+              },
+              {
+                "observation-uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f"
+              },
+              {
+                "observation-uuid": "18fc9391-937f-587a-b707-a2b763cca88e"
+              },
+              {
+                "observation-uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4"
+              },
+              {
+                "observation-uuid": "2e8a92ac-7621-5d87-943a-3db82d1123ca"
+              },
+              {
+                "observation-uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39"
+              },
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              },
+              {
+                "observation-uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c"
+              }
+            ]
+          },
+          {
+            "uuid": "196ebaec-65b5-5cc2-812c-0ed9f851abd5",
+            "title": "AC-4: AAR-09",
+            "description": "No unmitigated data exfiltration path",
+            "target": {
+              "type": "objective-id",
+              "target-id": "ac-4",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              },
+              {
+                "observation-uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c"
+              }
+            ]
+          },
+          {
+            "uuid": "7c59ba6a-ef11-546f-a785-691b0618c9a7",
+            "title": "AC-6: AAR-03, AAR-04, AAR-05",
+            "description": "Privileged agent actions require human approval; Tool scopes follow least privilege; Code and shell execution is sandboxed",
+            "target": {
+              "type": "objective-id",
+              "target-id": "ac-6",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              },
+              {
+                "observation-uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f"
+              },
+              {
+                "observation-uuid": "18fc9391-937f-587a-b707-a2b763cca88e"
+              },
+              {
+                "observation-uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4"
+              },
+              {
+                "observation-uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39"
+              },
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              },
+              {
+                "observation-uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c"
+              }
+            ]
+          },
+          {
+            "uuid": "00064a72-cce4-5639-9da0-1d8951a194f2",
+            "title": "CM-7: AAR-05",
+            "description": "Code and shell execution is sandboxed",
+            "target": {
+              "type": "objective-id",
+              "target-id": "cm-7",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              }
+            ]
+          },
+          {
+            "uuid": "ca3fa03c-3150-51ac-ab8e-20a3ea0e8c6a",
+            "title": "CM-8: AAR-12",
+            "description": "Every tool's capabilities are inventoried",
+            "target": {
+              "type": "objective-id",
+              "target-id": "cm-8",
+              "status": {
+                "state": "satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              },
+              {
+                "observation-uuid": "c70e9797-ae81-5156-95bc-f1570b825af8"
+              },
+              {
+                "observation-uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f"
+              },
+              {
+                "observation-uuid": "18fc9391-937f-587a-b707-a2b763cca88e"
+              },
+              {
+                "observation-uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4"
+              },
+              {
+                "observation-uuid": "2e8a92ac-7621-5d87-943a-3db82d1123ca"
+              },
+              {
+                "observation-uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39"
+              },
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              },
+              {
+                "observation-uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c"
+              }
+            ]
+          },
+          {
+            "uuid": "79572158-5093-5c49-8aee-5cb4da283b9a",
+            "title": "IA-5: AAR-06, AAR-07",
+            "description": "No credentials are hardcoded in agent configuration; Agent credentials are rotated within 90 days",
+            "target": {
+              "type": "objective-id",
+              "target-id": "ia-5",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              }
+            ]
+          },
+          {
+            "uuid": "47d3c09b-9718-5753-9c87-d746c2805cc3",
+            "title": "SC-8: AAR-11",
+            "description": "Remote tools use encrypted transport",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-8",
+              "status": {
+                "state": "satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              },
+              {
+                "observation-uuid": "c70e9797-ae81-5156-95bc-f1570b825af8"
+              },
+              {
+                "observation-uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f"
+              },
+              {
+                "observation-uuid": "18fc9391-937f-587a-b707-a2b763cca88e"
+              },
+              {
+                "observation-uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4"
+              },
+              {
+                "observation-uuid": "2e8a92ac-7621-5d87-943a-3db82d1123ca"
+              },
+              {
+                "observation-uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39"
+              },
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              },
+              {
+                "observation-uuid": "2b8d17c1-0ec4-5731-ba21-052f8020a80c"
+              }
+            ]
+          },
+          {
+            "uuid": "44994e78-5e62-591a-a425-fc44698eecb7",
+            "title": "SR-3: AAR-10",
+            "description": "Tool packages are pinned to a version",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sr-3",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "0632efc0-44ab-5663-8190-fef81f93db3b"
+              },
+              {
+                "observation-uuid": "c70e9797-ae81-5156-95bc-f1570b825af8"
+              },
+              {
+                "observation-uuid": "57eb26ab-3a57-5f56-8ce2-efd4a2e61f7f"
+              },
+              {
+                "observation-uuid": "18fc9391-937f-587a-b707-a2b763cca88e"
+              },
+              {
+                "observation-uuid": "f1d400e1-7608-5258-bc36-ab5f6050fff4"
+              },
+              {
+                "observation-uuid": "2e8a92ac-7621-5d87-943a-3db82d1123ca"
+              },
+              {
+                "observation-uuid": "3dbfbe3c-6f1e-5f60-8c3e-c49a486c2b39"
+              },
+              {
+                "observation-uuid": "3b98bcf7-c117-5367-95b6-82366ef85f36"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+agent_id,agent_name,owner,tool,category,resource,actions,data_classification,untrusted_input,egress,finding_ids,recommended_decision,reviewer_decision,reviewer,review_date
+claude-desktop-config,MCP host (claude_desktop_config.json),,desktop-commander,shell,@wonderwhy-er/desktop-commander,delete execute read write,confidential,False,False,AAR-03 AAR-05 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,fetch,fetch,mcp-server-fetch,read,public,True,True,AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,filesystem,filesystem,"/Users/username/Desktop, /path/to/other/allowed/dir (read-only), /path/to/file.txt",delete read write,confidential,False,False,AAR-03 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,git,git,path/to/git/repo,read write,confidential,False,False,AAR-03 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,memory,memory,mcp/memory,read write,internal,False,False,AAR-03 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,postgres,postgres,postgresql://host.docker.internal:5432/mydb,read,restricted,False,False,AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,puppeteer,browser,mcp/puppeteer,read send,public,True,True,AAR-03 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,slack,slack,@modelcontextprotocol/server-slack,read send,confidential,True,True,AAR-03 AAR-06 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,github,github,https://api.githubcopilot.com/mcp/,read write,confidential,True,True,AAR-03,Modify,,,

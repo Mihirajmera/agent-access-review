@@ -1,0 +1,10 @@
+agent_id,agent_name,owner,tool,category,resource,actions,data_classification,untrusted_input,egress,finding_ids,recommended_decision,reviewer_decision,reviewer,review_date
+desktop-commander,MCP host (desktop-commander.json),,desktop-commander,shell,@wonderwhy-er/desktop-commander,delete execute read write,confidential,False,False,AAR-03 AAR-05 AAR-10,Modify,,,
+fetch,MCP host (fetch.json),,fetch,fetch,mcp-server-fetch,read,public,True,True,AAR-10,Modify,,,
+filesystem,MCP host (filesystem.json),,filesystem,filesystem,"/Users/username/Desktop, /path/to/other/allowed/dir (read-only), /path/to/file.txt",delete read write,confidential,False,False,AAR-03 AAR-10,Modify,,,
+git,MCP host (git.json),,git,git,path/to/git/repo,read write,confidential,False,False,AAR-03 AAR-10,Modify,,,
+memory,MCP host (memory.json),,memory,memory,mcp/memory,read write,internal,False,False,AAR-03 AAR-10,Modify,,,
+postgres,MCP host (postgres.json),,postgres,postgres,postgresql://host.docker.internal:5432/mydb,read,restricted,False,False,AAR-10,Modify,,,
+puppeteer,MCP host (puppeteer.json),,puppeteer,browser,mcp/puppeteer,read send,public,True,True,AAR-03 AAR-10,Modify,,,
+slack,MCP host (slack.json),,slack,slack,@modelcontextprotocol/server-slack,read send,confidential,True,True,AAR-03 AAR-06 AAR-10,Modify,,,
+vscode-github,MCP host (vscode-github.json),,github,github,https://api.githubcopilot.com/mcp/,read write,confidential,True,True,AAR-03,Modify,,,

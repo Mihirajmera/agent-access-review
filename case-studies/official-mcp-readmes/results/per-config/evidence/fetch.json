@@ -1,0 +1,160 @@
+{
+  "agent_id": "fetch",
+  "collected": "2026-10-19T00:00:00+00:00",
+  "hash_scope": "sha256 of canonical JSON (sorted keys, no spaces) of {inventory, source_record}",
+  "inventory": {
+    "approved_by": null,
+    "approved_on": null,
+    "credentials": [],
+    "grants": [
+      {
+        "actions": [
+          "read"
+        ],
+        "category": "fetch",
+        "data_classification": "public",
+        "egress": true,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp-server-fetch",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "mcp-server-fetch",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "fetch",
+        "untrusted_input": true
+      }
+    ],
+    "id": "fetch",
+    "name": "MCP host (fetch.json)",
+    "owner": null,
+    "source": "configs/fetch.json",
+    "source_type": "mcp-config"
+  },
+  "results": [
+    {
+      "check_id": "AAR-01",
+      "findings": [
+        {
+          "agent_id": "fetch",
+          "check_id": "AAR-01",
+          "message": "No accountable human owner is recorded for this agent.",
+          "recommendation": "Assign an owner who answers for what the agent does, or decommission it.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Every agent has an accountable human owner"
+    },
+    {
+      "check_id": "AAR-02",
+      "findings": [
+        {
+          "agent_id": "fetch",
+          "check_id": "AAR-02",
+          "message": "Agent access has no recorded approval.",
+          "recommendation": "Route the agent through access approval before its next use.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Agent access is approved and recertified within 90 days"
+    },
+    {
+      "check_id": "AAR-03",
+      "findings": [],
+      "status": "PASS",
+      "title": "Privileged agent actions require human approval"
+    },
+    {
+      "check_id": "AAR-04",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool scopes follow least privilege"
+    },
+    {
+      "check_id": "AAR-05",
+      "findings": [],
+      "status": "PASS",
+      "title": "Code and shell execution is sandboxed"
+    },
+    {
+      "check_id": "AAR-06",
+      "findings": [],
+      "status": "PASS",
+      "title": "No credentials are hardcoded in agent configuration"
+    },
+    {
+      "check_id": "AAR-07",
+      "findings": [],
+      "status": "PASS",
+      "title": "Agent credentials are rotated within 90 days"
+    },
+    {
+      "check_id": "AAR-08",
+      "findings": [
+        {
+          "agent_id": "fetch",
+          "check_id": "AAR-08",
+          "message": "No tool usage is logged, so dormant access cannot be identified.",
+          "recommendation": "Log tool calls per agent so unused access can be found and removed.",
+          "severity": "low",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Dormant agent access is removed after 90 days"
+    },
+    {
+      "check_id": "AAR-09",
+      "findings": [],
+      "status": "PASS",
+      "title": "No unmitigated data exfiltration path"
+    },
+    {
+      "check_id": "AAR-10",
+      "findings": [
+        {
+          "agent_id": "fetch",
+          "check_id": "AAR-10",
+          "message": "fetch runs mcp-server-fetch without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "fetch"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Tool packages are pinned to a version"
+    },
+    {
+      "check_id": "AAR-11",
+      "findings": [],
+      "status": "PASS",
+      "title": "Remote tools use encrypted transport"
+    },
+    {
+      "check_id": "AAR-12",
+      "findings": [],
+      "status": "PASS",
+      "title": "Every tool's capabilities are inventoried"
+    }
+  ],
+  "review_as_of": "2026-10-19",
+  "sha256": "13225ff84283cf9200ff67df632a2ff0619f30315097e7bdf1d94934af6994ad",
+  "source": "configs/fetch.json",
+  "source_record": {
+    "mcpServers": {
+      "fetch": {
+        "args": [
+          "mcp-server-fetch"
+        ],
+        "command": "uvx"
+      }
+    }
+  },
+  "source_type": "mcp-config"
+}

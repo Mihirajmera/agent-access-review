@@ -9,6 +9,8 @@
 
 > **In one sentence:** the quarterly "who has access to what?" review that companies already run for employees, applied to AI agents.
 
+> **Real-world case study:** [what you get by copying the MCP configs from official READMEs](case-studies/official-mcp-readmes): 8 of 9 unpinned, 7 of 9 with unreviewed write/send/execute access, and an exfiltration path once they're combined.
+
 ## Quick start (2 minutes)
 
 You need Python 3.11+. No cloud account, API keys or network access.
