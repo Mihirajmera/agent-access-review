@@ -1,0 +1,185 @@
+{
+  "agent_id": "filesystem",
+  "collected": "2026-10-19T00:00:00+00:00",
+  "hash_scope": "sha256 of canonical JSON (sorted keys, no spaces) of {inventory, source_record}",
+  "inventory": {
+    "approved_by": null,
+    "approved_on": null,
+    "credentials": [],
+    "grants": [
+      {
+        "actions": [
+          "delete",
+          "read",
+          "write"
+        ],
+        "category": "filesystem",
+        "data_classification": "confidential",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp/filesystem",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "/Users/username/Desktop, /path/to/other/allowed/dir (read-only), /path/to/file.txt",
+        "sandboxed": false,
+        "scopes": [
+          "/Users/username/Desktop",
+          "/path/to/other/allowed/dir",
+          "/path/to/file.txt"
+        ],
+        "tool": "filesystem",
+        "untrusted_input": false
+      }
+    ],
+    "id": "filesystem",
+    "name": "MCP host (filesystem.json)",
+    "owner": null,
+    "source": "configs/filesystem.json",
+    "source_type": "mcp-config"
+  },
+  "results": [
+    {
+      "check_id": "AAR-01",
+      "findings": [
+        {
+          "agent_id": "filesystem",
+          "check_id": "AAR-01",
+          "message": "No accountable human owner is recorded for this agent.",
+          "recommendation": "Assign an owner who answers for what the agent does, or decommission it.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Every agent has an accountable human owner"
+    },
+    {
+      "check_id": "AAR-02",
+      "findings": [
+        {
+          "agent_id": "filesystem",
+          "check_id": "AAR-02",
+          "message": "Agent access has no recorded approval.",
+          "recommendation": "Route the agent through access approval before its next use.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Agent access is approved and recertified within 90 days"
+    },
+    {
+      "check_id": "AAR-03",
+      "findings": [
+        {
+          "agent_id": "filesystem",
+          "check_id": "AAR-03",
+          "message": "filesystem can delete / write confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "filesystem"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Privileged agent actions require human approval"
+    },
+    {
+      "check_id": "AAR-04",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool scopes follow least privilege"
+    },
+    {
+      "check_id": "AAR-05",
+      "findings": [],
+      "status": "PASS",
+      "title": "Code and shell execution is sandboxed"
+    },
+    {
+      "check_id": "AAR-06",
+      "findings": [],
+      "status": "PASS",
+      "title": "No credentials are hardcoded in agent configuration"
+    },
+    {
+      "check_id": "AAR-07",
+      "findings": [],
+      "status": "PASS",
+      "title": "Agent credentials are rotated within 90 days"
+    },
+    {
+      "check_id": "AAR-08",
+      "findings": [
+        {
+          "agent_id": "filesystem",
+          "check_id": "AAR-08",
+          "message": "No tool usage is logged, so dormant access cannot be identified.",
+          "recommendation": "Log tool calls per agent so unused access can be found and removed.",
+          "severity": "low",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Dormant agent access is removed after 90 days"
+    },
+    {
+      "check_id": "AAR-09",
+      "findings": [],
+      "status": "PASS",
+      "title": "No unmitigated data exfiltration path"
+    },
+    {
+      "check_id": "AAR-10",
+      "findings": [
+        {
+          "agent_id": "filesystem",
+          "check_id": "AAR-10",
+          "message": "filesystem runs mcp/filesystem without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "filesystem"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Tool packages are pinned to a version"
+    },
+    {
+      "check_id": "AAR-11",
+      "findings": [],
+      "status": "PASS",
+      "title": "Remote tools use encrypted transport"
+    },
+    {
+      "check_id": "AAR-12",
+      "findings": [],
+      "status": "PASS",
+      "title": "Every tool's capabilities are inventoried"
+    }
+  ],
+  "review_as_of": "2026-10-19",
+  "sha256": "b50d3bc183985f479cfbf3aa5e831981f8364907122eb286198bc14c3e456e2f",
+  "source": "configs/filesystem.json",
+  "source_record": {
+    "mcpServers": {
+      "filesystem": {
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "--mount",
+          "type=bind,src=/Users/username/Desktop,dst=/projects/Desktop",
+          "--mount",
+          "type=bind,src=/path/to/other/allowed/dir,dst=/projects/other/allowed/dir,ro",
+          "--mount",
+          "type=bind,src=/path/to/file.txt,dst=/projects/path/to/file.txt",
+          "mcp/filesystem",
+          "/projects"
+        ],
+        "command": "docker"
+      }
+    }
+  },
+  "source_type": "mcp-config"
+}

@@ -1,0 +1,101 @@
+{
+  "fetch": {
+    "source": "https://github.com/modelcontextprotocol/servers/blob/main/src/fetch/README.md#L79",
+    "servers": [
+      "fetch"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers/blob/51b6382a3e827aceb6bce430b1208d69b93d95ea/src/fetch/README.md#L79",
+    "repo": "modelcontextprotocol/servers",
+    "path": "src/fetch/README.md",
+    "line": 79,
+    "commit": "51b6382a3e827aceb6bce430b1208d69b93d95ea"
+  },
+  "memory": {
+    "source": "https://github.com/modelcontextprotocol/servers/blob/main/src/memory/README.md#L158",
+    "servers": [
+      "memory"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers/blob/51b6382a3e827aceb6bce430b1208d69b93d95ea/src/memory/README.md#L158",
+    "repo": "modelcontextprotocol/servers",
+    "path": "src/memory/README.md",
+    "line": 158,
+    "commit": "51b6382a3e827aceb6bce430b1208d69b93d95ea"
+  },
+  "postgres": {
+    "source": "https://github.com/modelcontextprotocol/servers-archived/blob/main/src/postgres/README.md#L35",
+    "servers": [
+      "postgres"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers-archived/blob/9be4674d1ddf8c469e6461a27a337eeb65f76c2e/src/postgres/README.md#L35",
+    "repo": "modelcontextprotocol/servers-archived",
+    "path": "src/postgres/README.md",
+    "line": 35,
+    "commit": "9be4674d1ddf8c469e6461a27a337eeb65f76c2e"
+  },
+  "slack": {
+    "source": "https://github.com/modelcontextprotocol/servers-archived/blob/main/src/slack/README.md#L96",
+    "servers": [
+      "slack"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers-archived/blob/9be4674d1ddf8c469e6461a27a337eeb65f76c2e/src/slack/README.md#L96",
+    "repo": "modelcontextprotocol/servers-archived",
+    "path": "src/slack/README.md",
+    "line": 96,
+    "commit": "9be4674d1ddf8c469e6461a27a337eeb65f76c2e"
+  },
+  "puppeteer": {
+    "source": "https://github.com/modelcontextprotocol/servers-archived/blob/main/src/puppeteer/README.md#L91",
+    "servers": [
+      "puppeteer"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers-archived/blob/9be4674d1ddf8c469e6461a27a337eeb65f76c2e/src/puppeteer/README.md#L91",
+    "repo": "modelcontextprotocol/servers-archived",
+    "path": "src/puppeteer/README.md",
+    "line": 91,
+    "commit": "9be4674d1ddf8c469e6461a27a337eeb65f76c2e"
+  },
+  "desktop-commander": {
+    "source": "https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/main/README.md#L154",
+    "servers": [
+      "desktop-commander"
+    ],
+    "permalink": "https://github.com/wonderwhy-er/DesktopCommanderMCP/blob/2f4327e0f17cadb27543484abea3063ec5bf4f73/README.md#L154",
+    "repo": "wonderwhy-er/DesktopCommanderMCP",
+    "path": "README.md",
+    "line": 154,
+    "commit": "2f4327e0f17cadb27543484abea3063ec5bf4f73"
+  },
+  "git": {
+    "source": "https://github.com/modelcontextprotocol/servers/blob/main/src/git/README.md#L147",
+    "servers": [
+      "git"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers/blob/51b6382a3e827aceb6bce430b1208d69b93d95ea/src/git/README.md#L147",
+    "repo": "modelcontextprotocol/servers",
+    "path": "src/git/README.md",
+    "line": 147,
+    "commit": "51b6382a3e827aceb6bce430b1208d69b93d95ea"
+  },
+  "vscode-github": {
+    "source": "https://github.com/github/github-mcp-server/blob/main/README.md#L55",
+    "servers": [
+      "github"
+    ],
+    "permalink": "https://github.com/github/github-mcp-server/blob/e3809fe91c7546633241006bf0b91f23b2595e28/README.md#L55",
+    "repo": "github/github-mcp-server",
+    "path": "README.md",
+    "line": 55,
+    "commit": "e3809fe91c7546633241006bf0b91f23b2595e28"
+  },
+  "filesystem": {
+    "source": "https://github.com/modelcontextprotocol/servers/blob/main/src/filesystem/README.md#L238",
+    "servers": [
+      "filesystem"
+    ],
+    "permalink": "https://github.com/modelcontextprotocol/servers/blob/51b6382a3e827aceb6bce430b1208d69b93d95ea/src/filesystem/README.md#L238",
+    "repo": "modelcontextprotocol/servers",
+    "path": "src/filesystem/README.md",
+    "line": 238,
+    "commit": "51b6382a3e827aceb6bce430b1208d69b93d95ea"
+  }
+}

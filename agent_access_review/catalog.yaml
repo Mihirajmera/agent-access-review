@@ -8,10 +8,12 @@
 #   untrusted_input:      the tool returns content an outsider can author (prompt-injection source)
 #   egress:               the tool can move data outside the organization
 #   resource_from:        how to name the resource: paths (filesystem args) | dsn (connection string)
+#   aliases:              other names the same server runs under (official Docker image, uvx name)
 
 servers:
   "@modelcontextprotocol/server-filesystem":
     tool: filesystem
+    aliases: [mcp/filesystem]
     actions: [read, write, delete]
     data_classification: confidential
     resource_from: paths
@@ -32,6 +34,7 @@ servers:
 
   "@modelcontextprotocol/server-postgres":
     tool: postgres
+    aliases: [mcp/postgres]
     actions: [read]
     data_classification: restricted
     resource_from: dsn
@@ -45,6 +48,7 @@ servers:
 
   "mcp-server-fetch":
     tool: fetch
+    aliases: [mcp/fetch]
     actions: [read]
     data_classification: public
     untrusted_input: true
@@ -52,6 +56,7 @@ servers:
 
   "@modelcontextprotocol/server-puppeteer":
     tool: browser
+    aliases: [mcp/puppeteer]
     actions: [read, send]
     data_classification: public
     untrusted_input: true
@@ -74,8 +79,16 @@ servers:
     actions: [execute]
     data_classification: confidential
 
+  "mcp-server-git":
+    tool: git
+    aliases: [mcp/git]
+    actions: [read, write]        # git_add, git_commit, git_reset, git_checkout, git_create_branch
+    data_classification: confidential
+    resource_from: paths
+
   "@modelcontextprotocol/server-memory":
     tool: memory
+    aliases: [mcp/memory]
     actions: [read, write]
     data_classification: internal
 

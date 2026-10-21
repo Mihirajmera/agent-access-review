@@ -152,3 +152,37 @@ def test_jsonc_rejects_malformed_input(tmp_path, text):
     path.write_text(text, encoding='utf-8')
     with pytest.raises(ValueError):
         load(path)
+
+
+@pytest.mark.parametrize('args,expected', [
+    (['run', '-i', '--rm', '--mount', 'type=bind,src=/Users/dev/Desktop,dst=/projects/Desktop',
+      '--mount', 'type=bind,src=/data,dst=/projects/data,ro', 'mcp/filesystem', '/projects'],
+     [('/Users/dev/Desktop', False), ('/data', True)]),
+    (['run', '-v', r'C:\Users\dev:/home/dev:ro', '-v', 'claude-memory:/app/dist', 'mcp/memory'],
+     [(r'C:\Users\dev', True)]),                       # Windows drive path kept; named volume ignored
+    (['run', '--mount', 'type=bind,source=~/code,target=/code,readonly', 'img'], [('~/code', True)]),
+])
+def test_docker_mounts(args, expected):
+    from agent_access_review.parsers import _docker_mounts
+    assert _docker_mounts('docker', args) == expected
+
+
+def test_official_docker_images_are_classified(write_json):
+    # Found by scanning the official MCP READMEs: their Docker-based examples were unclassified.
+    cfg = write_json('mcp.json', {'mcpServers': {
+        'filesystem': {'command': 'docker', 'args': [
+            'run', '-i', '--rm', '--mount', 'type=bind,src=/Users/dev,dst=/projects/home',
+            '--mount', 'type=bind,src=/srv/docs,dst=/projects/docs,ro', 'mcp/filesystem', '/projects']},
+        'docs': {'command': 'docker', 'args': [
+            'run', '-i', '--rm', '--mount', 'type=bind,src=/srv/docs,dst=/projects/docs,ro', 'mcp/filesystem', '/projects']},
+        'postgres': {'command': 'docker', 'args': ['run', '-i', '--rm', 'mcp/postgres', 'postgresql://db/app']},
+        'git': {'command': 'uvx', 'args': ['mcp-server-git', '--repository', 'repo']},
+    }})
+    [agent] = load(cfg)
+    g = {x.tool: x for x in agent.grants}
+    assert all(x.known for x in g.values())
+    assert g['filesystem'].scopes == ['/Users/dev', '/srv/docs']          # host paths, not /projects
+    assert g['docs'].actions == {'read'}                                  # only read-only mounts
+    assert g['postgres'].category == 'postgres' and g['git'].category == 'git'
+    from agent_access_review.checks import run_all
+    assert 'AAR-04' in {f.check_id for f in run_all(agent, date(2026, 10, 19)) if f.tool == 'filesystem'}

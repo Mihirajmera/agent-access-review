@@ -1,0 +1,554 @@
+{
+  "agent_id": "claude-desktop-config",
+  "collected": "2026-10-19T00:00:00+00:00",
+  "hash_scope": "sha256 of canonical JSON (sorted keys, no spaces) of {inventory, source_record}",
+  "inventory": {
+    "approved_by": null,
+    "approved_on": null,
+    "credentials": [
+      {
+        "hardcoded": true,
+        "last_rotated": null,
+        "name": "slack.SLACK_BOT_TOKEN"
+      }
+    ],
+    "grants": [
+      {
+        "actions": [
+          "delete",
+          "execute",
+          "read",
+          "write"
+        ],
+        "category": "shell",
+        "data_classification": "confidential",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "@wonderwhy-er/desktop-commander",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "@wonderwhy-er/desktop-commander",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "desktop-commander",
+        "untrusted_input": false
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "category": "fetch",
+        "data_classification": "public",
+        "egress": true,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp-server-fetch",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "mcp-server-fetch",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "fetch",
+        "untrusted_input": true
+      },
+      {
+        "actions": [
+          "delete",
+          "read",
+          "write"
+        ],
+        "category": "filesystem",
+        "data_classification": "confidential",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp/filesystem",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "/Users/username/Desktop, /path/to/other/allowed/dir (read-only), /path/to/file.txt",
+        "sandboxed": false,
+        "scopes": [
+          "/Users/username/Desktop",
+          "/path/to/other/allowed/dir",
+          "/path/to/file.txt"
+        ],
+        "tool": "filesystem",
+        "untrusted_input": false
+      },
+      {
+        "actions": [
+          "read",
+          "write"
+        ],
+        "category": "git",
+        "data_classification": "confidential",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp-server-git",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "path/to/git/repo",
+        "sandboxed": false,
+        "scopes": [
+          "path/to/git/repo"
+        ],
+        "tool": "git",
+        "untrusted_input": false
+      },
+      {
+        "actions": [
+          "read",
+          "write"
+        ],
+        "category": "memory",
+        "data_classification": "internal",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp/memory",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "mcp/memory",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "memory",
+        "untrusted_input": false
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "category": "postgres",
+        "data_classification": "restricted",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp/postgres",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "postgresql://host.docker.internal:5432/mydb",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "postgres",
+        "untrusted_input": false
+      },
+      {
+        "actions": [
+          "read",
+          "send"
+        ],
+        "category": "browser",
+        "data_classification": "public",
+        "egress": true,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp/puppeteer",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "mcp/puppeteer",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "puppeteer",
+        "untrusted_input": true
+      },
+      {
+        "actions": [
+          "read",
+          "send"
+        ],
+        "category": "slack",
+        "data_classification": "confidential",
+        "egress": true,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "@modelcontextprotocol/server-slack",
+        "pinned": false,
+        "requires_approval": false,
+        "resource": "@modelcontextprotocol/server-slack",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "slack",
+        "untrusted_input": true
+      },
+      {
+        "actions": [
+          "read",
+          "write"
+        ],
+        "category": "github",
+        "data_classification": "confidential",
+        "egress": true,
+        "endpoint": "https://api.githubcopilot.com/mcp/",
+        "known": true,
+        "last_used": null,
+        "package": null,
+        "pinned": null,
+        "requires_approval": false,
+        "resource": "https://api.githubcopilot.com/mcp/",
+        "sandboxed": false,
+        "scopes": [],
+        "tool": "github",
+        "untrusted_input": true
+      }
+    ],
+    "id": "claude-desktop-config",
+    "name": "MCP host (claude_desktop_config.json)",
+    "owner": null,
+    "source": "combined/claude_desktop_config.json",
+    "source_type": "mcp-config"
+  },
+  "results": [
+    {
+      "check_id": "AAR-01",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-01",
+          "message": "No accountable human owner is recorded for this agent.",
+          "recommendation": "Assign an owner who answers for what the agent does, or decommission it.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Every agent has an accountable human owner"
+    },
+    {
+      "check_id": "AAR-02",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-02",
+          "message": "Agent access has no recorded approval.",
+          "recommendation": "Route the agent through access approval before its next use.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Agent access is approved and recertified within 90 days"
+    },
+    {
+      "check_id": "AAR-03",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "desktop-commander can delete / write confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "desktop-commander"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "filesystem can delete / write confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "filesystem"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "git can write confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "git"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "memory can write internal data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "medium",
+          "tool": "memory"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "puppeteer can send public data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "medium",
+          "tool": "puppeteer"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "slack can send confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "slack"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-03",
+          "message": "github can write confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "github"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Privileged agent actions require human approval"
+    },
+    {
+      "check_id": "AAR-04",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool scopes follow least privilege"
+    },
+    {
+      "check_id": "AAR-05",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-05",
+          "message": "desktop-commander can execute arbitrary commands on the host without a sandbox.",
+          "recommendation": "Run the tool in a container or VM with no host credentials mounted, or remove it.",
+          "severity": "high",
+          "tool": "desktop-commander"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Code and shell execution is sandboxed"
+    },
+    {
+      "check_id": "AAR-06",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-06",
+          "message": "Credential slack.SLACK_BOT_TOKEN is stored in plain text in the agent configuration.",
+          "recommendation": "Revoke and reissue it, then load it from a secret manager or environment reference.",
+          "severity": "high",
+          "tool": "slack"
+        }
+      ],
+      "status": "FAIL",
+      "title": "No credentials are hardcoded in agent configuration"
+    },
+    {
+      "check_id": "AAR-07",
+      "findings": [],
+      "status": "PASS",
+      "title": "Agent credentials are rotated within 90 days"
+    },
+    {
+      "check_id": "AAR-08",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-08",
+          "message": "No tool usage is logged, so dormant access cannot be identified.",
+          "recommendation": "Log tool calls per agent so unused access can be found and removed.",
+          "severity": "low",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "Dormant agent access is removed after 90 days"
+    },
+    {
+      "check_id": "AAR-09",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-09",
+          "message": "Exfiltration path: reads sensitive data (desktop-commander, filesystem, git, github, postgres, slack), ingests untrusted content (fetch, github, puppeteer, slack) and can send data out (fetch, github, puppeteer, slack) with no human approval. A prompt injection in the untrusted content could leak the data.",
+          "recommendation": "Break the chain: split the agent, remove one leg, or require approval on every egress action.",
+          "severity": "high",
+          "tool": null
+        }
+      ],
+      "status": "FAIL",
+      "title": "No unmitigated data exfiltration path"
+    },
+    {
+      "check_id": "AAR-10",
+      "findings": [
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "desktop-commander runs @wonderwhy-er/desktop-commander without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "desktop-commander"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "fetch runs mcp-server-fetch without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "fetch"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "filesystem runs mcp/filesystem without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "filesystem"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "git runs mcp-server-git without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "git"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "memory runs mcp/memory without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "memory"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "postgres runs mcp/postgres without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "postgres"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "puppeteer runs mcp/puppeteer without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "puppeteer"
+        },
+        {
+          "agent_id": "claude-desktop-config",
+          "check_id": "AAR-10",
+          "message": "slack runs @modelcontextprotocol/server-slack without a pinned version, so a new upstream release runs automatically.",
+          "recommendation": "Pin an exact version (npm/PyPI) or image digest and update it through change control.",
+          "severity": "medium",
+          "tool": "slack"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Tool packages are pinned to a version"
+    },
+    {
+      "check_id": "AAR-11",
+      "findings": [],
+      "status": "PASS",
+      "title": "Remote tools use encrypted transport"
+    },
+    {
+      "check_id": "AAR-12",
+      "findings": [],
+      "status": "PASS",
+      "title": "Every tool's capabilities are inventoried"
+    }
+  ],
+  "review_as_of": "2026-10-19",
+  "sha256": "d049e5e54b158365a8ee3f92849beb51e7ce321b2b1036bd20f635ac973d0efa",
+  "source": "combined/claude_desktop_config.json",
+  "source_record": {
+    "mcpServers": {
+      "desktop-commander": {
+        "args": [
+          "-y",
+          "@wonderwhy-er/desktop-commander@latest"
+        ],
+        "command": "npx"
+      },
+      "fetch": {
+        "args": [
+          "mcp-server-fetch"
+        ],
+        "command": "uvx"
+      },
+      "filesystem": {
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "--mount",
+          "type=bind,src=/Users/username/Desktop,dst=/projects/Desktop",
+          "--mount",
+          "type=bind,src=/path/to/other/allowed/dir,dst=/projects/other/allowed/dir,ro",
+          "--mount",
+          "type=bind,src=/path/to/file.txt,dst=/projects/path/to/file.txt",
+          "mcp/filesystem",
+          "/projects"
+        ],
+        "command": "docker"
+      },
+      "git": {
+        "args": [
+          "mcp-server-git",
+          "--repository",
+          "path/to/git/repo"
+        ],
+        "command": "uvx"
+      },
+      "github": {
+        "type": "http",
+        "url": "https://api.githubcopilot.com/mcp/"
+      },
+      "memory": {
+        "args": [
+          "run",
+          "-i",
+          "-v",
+          "claude-memory:/app/dist",
+          "--rm",
+          "mcp/memory"
+        ],
+        "command": "docker"
+      },
+      "postgres": {
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "mcp/postgres",
+          "postgresql://host.docker.internal:5432/mydb"
+        ],
+        "command": "docker"
+      },
+      "puppeteer": {
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "--init",
+          "-e",
+          "DOCKER_CONTAINER=true",
+          "mcp/puppeteer"
+        ],
+        "command": "docker"
+      },
+      "slack": {
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-slack"
+        ],
+        "command": "npx",
+        "env": {
+          "SLACK_BOT_TOKEN": "***REDACTED***",
+          "SLACK_CHANNEL_IDS": "C01234567, C76543210",
+          "SLACK_TEAM_ID": "T01234567"
+        }
+      }
+    }
+  },
+  "source_type": "mcp-config"
+}

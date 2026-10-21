@@ -24,6 +24,9 @@ import yaml
 from .model import Agent, Credential, Grant
 
 CATALOG = yaml.safe_load((Path(__file__).parent / 'catalog.yaml').read_text(encoding='utf-8'))
+# Look servers up by package name or any alias (official Docker image, uvx name, ...).
+SERVERS = {alias: profile for name, profile in CATALOG['servers'].items()
+           for alias in [name, *profile.get('aliases', [])]}
 
 REDACTED = '***REDACTED***'
 SECRET_NAME = re.compile(r'TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|CREDENTIAL|(^|_)PAT($|_)|AUTH', re.I)
@@ -144,11 +147,43 @@ def _mcp_server(name: str, spec: dict) -> tuple[Grant, list[Credential]]:
             creds.append(Credential(name=f'{name}.connection-string', hardcoded=True))
         elif (m := SECRET_FLAG.match(a)) and not is_reference(m.group(2)):
             creds.append(Credential(name=f'{name}.arg.{m.group(1).lstrip("-")}', hardcoded=True))
-    profile = CATALOG['servers'].get(package) if package else None
+    profile = SERVERS.get(package) if package else None
     resource = package if pinned is not None else ' '.join([spec.get('command', name), *map(redact_arg, args)]).strip()
     grant = _grant_from_profile(name, profile, resource=resource, args=args)
     grant.package, grant.pinned = package, pinned
+    mounts = _docker_mounts(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
+    if mounts and grant.known:
+        # In a container the server only reaches what's mounted from the host, so the host
+        # paths are what the agent can really touch (and what least privilege is judged on).
+        grant.scopes = [src for src, _ in mounts]
+        if profile.get('resource_from') == 'paths':
+            grant.resource = ', '.join(src + (' (read-only)' if ro else '') for src, ro in mounts)
+            if all(ro for _, ro in mounts):
+                grant.actions &= {'read'}
     return grant, creds
+
+
+def _docker_mounts(command: str, args: list[str]) -> list[tuple[str, bool]]:
+    """Host paths bind-mounted into a docker/podman container, as (host path, read-only).
+    Named volumes aren't host paths and are ignored."""
+    if Path(command).name.lower().removesuffix('.exe') not in {'docker', 'podman'}:
+        return []
+    mounts = []
+    for flag, value in zip(args, args[1:]):
+        if flag in ('-v', '--volume'):
+            drive = value[:2] if re.match(r'^[A-Za-z]:[\\/]', value) else ''
+            parts = value[len(drive):].split(':')
+            src, opts = drive + parts[0], parts[2] if len(parts) > 2 else ''
+            ro = 'ro' in opts.split(',')
+        elif flag == '--mount':
+            fields = dict(f.split('=', 1) if '=' in f else (f, 'true') for f in value.split(','))
+            src = fields.get('src') or fields.get('source') or ''
+            ro = fields.get('ro') == 'true' or fields.get('readonly') == 'true' or 'ro' in fields
+        else:
+            continue
+        if re.match(r'^([/~.]|[A-Za-z]:[\\/])', src):
+            mounts.append((src, ro))
+    return mounts
 
 
 def _package(command: str, args: list[str]) -> tuple[str | None, bool | None, list[str]]:
