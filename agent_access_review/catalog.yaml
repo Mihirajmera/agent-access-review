@@ -92,6 +92,24 @@ servers:
     actions: [read, write]
     data_classification: internal
 
+
+  "mcp-server-sqlite":                 # uvx name; read_query/write_query/create_table per its README
+    tool: sqlite
+    actions: [read, write]
+    data_classification: confidential
+
+  "@modelcontextprotocol/server-brave-search":
+    tool: brave-search
+    actions: [read]                     # web/local search only
+    data_classification: public
+    untrusted_input: true               # search results are outsider-authored content
+    egress: true                        # search queries leave the organization
+
+  "@modelcontextprotocol/server-gdrive":
+    tool: gdrive
+    actions: [read]                     # search + read-only file access (drive.readonly OAuth scope)
+    data_classification: confidential
+
 # Remote (HTTP/SSE) MCP servers, matched on hostname.
 remote_hosts:
   "api.githubcopilot.com":

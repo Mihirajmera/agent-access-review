@@ -186,3 +186,25 @@ def test_official_docker_images_are_classified(write_json):
     assert g['postgres'].category == 'postgres' and g['git'].category == 'git'
     from agent_access_review.checks import run_all
     assert 'AAR-04' in {f.check_id for f in run_all(agent, date(2026, 10, 19)) if f.tool == 'filesystem'}
+
+def test_catalog_classifies_sqlite_brave_gdrive(write_json):
+    # https://github.com/Mihirajmera/agent-access-review/issues/4
+    # These servers appear in many MCP configs but used to fall through as
+    # unclassified (AAR-12); the catalog now carries their capability profiles.
+    cfg = write_json('mcp.json', {'mcpServers': {
+        'sqlite': {'command': 'uvx', 'args': ['mcp-server-sqlite', '--db-path', 'app.db']},
+        'brave': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-brave-search']},
+        'gdrive': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-gdrive']},
+    }})
+    [agent] = load(cfg)
+    g = {x.tool: x for x in agent.grants}
+    assert all(x.known for x in g.values()), 'all three servers must be classified, not AAR-12'
+    assert g['sqlite'].category == 'sqlite'
+    assert g['sqlite'].actions == {'read', 'write'}                       # read_query / write_query / create_table
+    assert g['sqlite'].data_classification == 'confidential'
+    assert g['brave'].category == 'brave-search'
+    assert g['brave'].actions == {'read'}                                 # web/local search only
+    assert g['brave'].egress and g['brave'].untrusted_input               # queries + results leave the org
+    assert g['gdrive'].category == 'gdrive'
+    assert g['gdrive'].actions == {'read'}                                # drive.readonly scope
+    assert g['gdrive'].data_classification == 'confidential'
