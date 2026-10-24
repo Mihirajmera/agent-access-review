@@ -1,11 +1,12 @@
 """CLI.
 
   agent-access-review demo                       review the bundled example agents
-  agent-access-review scan <paths> [--out review] [--as-of YYYY-MM-DD] [--fail-on high]
+  agent-access-review scan <paths> [--out review] [--as-of YYYY-MM-DD] [--fail-on high] [--format json]
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -38,6 +39,8 @@ def main(argv: list[str] | None = None) -> int:
                       help='review date used for recertification, rotation and dormancy (default: today)')
     scan.add_argument('--fail-on', choices=['high', 'medium', 'low', 'never'], default='never',
                       help='exit 1 if any finding is at or above this severity (for CI gates)')
+    scan.add_argument('--format', choices=['json'], default=None,
+                      help='print each agent\'s findings as one JSON document on stdout (files are still written)')
     demo = sub.add_parser('demo', help='review the bundled example agents (no setup needed)')
     demo.add_argument('--out', type=Path, default=Path('review-demo'), help='output folder (default: review-demo)')
     args = ap.parse_args(argv)
@@ -49,10 +52,11 @@ def main(argv: list[str] | None = None) -> int:
     missing = [p for p in args.paths if not p.exists()]
     if missing:
         ap.error(f'not found: {", ".join(map(str, missing))}')
-    return run(args.paths, args.out, args.as_of, args.fail_on)
+    return run(args.paths, args.out, args.as_of, args.fail_on, fmt=getattr(args, 'format', None))
 
 
-def run(paths: list[Path], out: Path, as_of: date, fail_on: str, demo: bool = False) -> int:
+def run(paths: list[Path], out: Path, as_of: date, fail_on: str, demo: bool = False,
+        fmt: str | None = None) -> int:
     agents = discover(paths)
     if not agents:
         print('No MCP configs or agent manifests found.', file=sys.stderr)
@@ -60,6 +64,31 @@ def run(paths: list[Path], out: Path, as_of: date, fail_on: str, demo: bool = Fa
 
     results = [(a, run_all(a, as_of)) for a in agents]
     written = write_all(results, out, as_of)
+
+    if fmt == 'json':
+        payload = {
+            'as_of': as_of.isoformat(),
+            'agents': [
+                {
+                    'agent': agent.id,
+                    'tools': len(agent.grants),
+                    'findings': [
+                        {
+                            'check_id': f.check_id,
+                            'severity': f.severity,
+                            'tool': f.tool,
+                            'message': f.message,
+                            'recommendation': f.recommendation,
+                        }
+                        for f in findings
+                    ],
+                }
+                for agent, findings in results
+            ],
+        }
+        json.dump(payload, sys.stdout, indent=2)
+        sys.stdout.write('\n')
+        return _exit_code(results, fail_on)
 
     print(f'{"AGENT":<28} {"TOOLS":>5} {"HIGH":>5} {"MED":>5} {"LOW":>5}')
     for agent, findings in results:
@@ -70,6 +99,10 @@ def run(paths: list[Path], out: Path, as_of: date, fail_on: str, demo: bool = Fa
         print('\nOpen the review packet to see each agent\'s access, findings and recommended decisions.'
               '\nNext: run `agent-access-review scan <your MCP config>` on your own setup.')
 
+    return _exit_code(results, fail_on)
+
+
+def _exit_code(results: list[tuple], fail_on: str) -> int:
     if fail_on != 'never':
         floor = SEVERITY_ORDER[fail_on]
         if any(SEVERITY_ORDER[f.severity] >= floor for _, fs in results for f in fs):
