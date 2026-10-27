@@ -280,6 +280,39 @@ def redact_arg(arg: str) -> str:
 
 # --------------------------------------------------------------------------- manifests
 
+def _as_list(value) -> list:
+    """A manifest field that means a list, written either as a list or as one value.
+
+    `actions: delete` and `actions: [delete]` say the same thing to the person who wrote them.
+    Treating the first as a string turned it into {'d','e','l','t','e'} -- none of which is a
+    privileged action -- so AAR-03 stayed silent on a grant that can delete. `scopes: repo`
+    became {'r','e','p','o'}, which matches no broad scope, so AAR-04 stayed silent too. The
+    same shape reaches the report, where the review shows a scope per letter.
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, (list, tuple, set)):
+        return list(value)
+    return [value]
+
+
+def _as_bool(value) -> bool:
+    """A manifest flag, written as a YAML boolean or as the word for one.
+
+    `sandboxed: "false"` is a string, and bool('false') is True -- so a quoted false read as
+    "sandboxed", and AAR-05 passed a tool that executes commands on the host. A quoted "no"
+    read as "needs approval", and AAR-03 passed a delete grant. Anything unrecognised is
+    treated as the safe answer (no approval, not sandboxed), so a typo cannot silence a check.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {'true', 'yes', 'y', '1', 'on'}
+    return bool(value)
+
+
 def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Agent]:
     agents = []
     for rec in data['agents']:
@@ -297,13 +330,13 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
             agent.grants.append(Grant(
                 tool=t['name'],
                 resource=t.get('resource', t['name']),
-                actions=set(t.get('actions', ['read'])),
-                scopes=list(t.get('scopes', [])),
+                actions=set(_as_list(t.get('actions', ['read']))),
+                scopes=_as_list(t.get('scopes')),
                 data_classification=t.get('data_classification', 'internal'),
-                untrusted_input=bool(t.get('untrusted_input', False)),
-                egress=bool(t.get('egress', False)),
-                requires_approval=bool(t.get('requires_approval', False)),
-                sandboxed=bool(t.get('sandboxed', False)),
+                untrusted_input=_as_bool(t.get('untrusted_input', False)),
+                egress=_as_bool(t.get('egress', False)),
+                requires_approval=_as_bool(t.get('requires_approval', False)),
+                sandboxed=_as_bool(t.get('sandboxed', False)),
                 last_used=_date(t.get('last_used')),
                 package=t.get('package'),
                 pinned=t.get('pinned'),

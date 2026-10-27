@@ -66,6 +66,49 @@ def test_vscode_remote_servers():
     assert not any(c.hardcoded for c in agent.credentials)     # ${input:...} references
 
 
+def _manifest(tmp_path, body: str):
+    path = tmp_path / 'agents.yaml'
+    path.write_text('agents:\n'
+                    '  - id: ops-agent\n'
+                    '    name: Ops agent\n'
+                    '    owner: platform-team\n'
+                    '    approved_by: platform-team\n'
+                    '    approved_on: 2026-10-01\n'
+                    '    tools:\n'
+                    '      - name: fs\n'
+                    '        resource: disk\n' + body, encoding='utf-8')
+    return load(path)[0].grants[0]
+
+
+@pytest.mark.parametrize('field, value, expected', [
+    ('actions', '[delete]', {'delete'}),
+    ('actions', 'delete', {'delete'}),
+    ('actions', 'execute', {'execute'}),
+    ('scopes', '[repo]', ['repo']),
+    ('scopes', 'repo', ['repo']),
+    ('scopes', 'mail:*', ['mail:*']),
+])
+def test_a_list_field_may_hold_a_single_value(tmp_path, field, value, expected):
+    """`actions: delete` used to become {'d','e','l','t','e'}: no privileged action at all."""
+    g = _manifest(tmp_path, f'        {field}: {value}\n')
+    assert getattr(g, field) == expected
+
+
+@pytest.mark.parametrize('value, expected', [
+    ('"false"', False), ('"no"', False), ('false', False),
+    ('true', True), ('"true"', True), ('"yes"', True),
+])
+def test_a_flag_may_be_written_as_a_word(tmp_path, value, expected):
+    """bool('false') is True, so a quoted false used to read as "sandboxed"."""
+    assert _manifest(tmp_path, f'        actions: [execute]\n        sandboxed: {value}\n').sandboxed is expected
+
+
+def test_an_unrecognised_flag_is_the_safe_answer(tmp_path):
+    """A typo must not silence a check, so it falls back to "no approval, not sandboxed"."""
+    g = _manifest(tmp_path, '        actions: [execute]\n        sandboxed: sometimes\n')
+    assert g.sandboxed is False
+
+
 def test_manifest_example():
     agents = {a.id: a for a in load(EXAMPLES / 'agents.yaml')}
     assert set(agents) == {'support-copilot', 'finance-ops-agent', 'devops-agent'}

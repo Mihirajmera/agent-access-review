@@ -5,6 +5,8 @@
 - VS Code `mcp.json` files with comments and trailing commas (JSONC) are now reviewed instead of skipped; malformed input is still rejected (#12, thanks @premsinghsodha7).
 - `scan --format json` prints each agent's findings as one JSON document on stdout for CI and other tools; the review packet and `--fail-on` exit codes are unchanged (#19, thanks @CJstate).
 - The `mcp-server-sqlite`, Brave Search and Google Drive MCP servers are now classified instead of reported as unknown (#20, thanks @CJstate).
+- Fixed: `actions` and `scopes` now accept a single value as well as a list. `actions: delete` was read as a string and split into `{'d','e','l','t','e'}`, none of which is a privileged action, so `AAR-03` stayed silent on a grant that can delete; `scopes: repo` became `{'r','e','p','o'}`, which matches no broad scope, so `AAR-04` stayed silent on full repository access. The same shape reached the review, which listed one scope per letter.
+- Fixed: `untrusted_input`, `egress`, `requires_approval` and `sandboxed` now read a quoted boolean as a boolean. `bool('false')` is `True`, so `sandboxed: "false"` read as "sandboxed" and `AAR-05` passed a tool that runs commands on the host; `requires_approval: "false"` read as "needs approval" and `AAR-03` passed a delete grant. An unrecognised value falls back to the answer that does not silence a check.
 
 ## 0.2.1 (2026-10-19)
 
