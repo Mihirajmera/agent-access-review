@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 import pytest
@@ -208,3 +209,74 @@ def test_catalog_classifies_sqlite_brave_gdrive(write_json):
     assert g['gdrive'].category == 'gdrive'
     assert g['gdrive'].actions == {'read'}                                # drive.readonly scope
     assert g['gdrive'].data_classification == 'confidential'
+
+
+def test_discover_reads_configs_saved_with_a_byte_order_mark(tmp_path, capsys):
+    # Notepad and PowerShell's Out-File write a BOM by default on Windows, and the epilog
+    # points Windows users straight at %APPDATA%\Claude\claude_desktop_config.json. json.loads
+    # rejected the BOM, discover() reported the file as skipped, and the host disappeared from
+    # the review while the scan still exited 0.
+    path = tmp_path / 'claude_desktop_config.json'
+    path.write_bytes(b'\xef\xbb\xbf' + json.dumps({'mcpServers': {
+        'filesystem': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-filesystem', '/']}}
+    }).encode('utf-8'))
+    [agent] = discover([tmp_path])
+    assert agent.source_type == 'mcp-config'
+    assert [g.tool for g in agent.grants] == ['filesystem']
+    assert capsys.readouterr().err == ''
+
+
+@pytest.mark.parametrize('args,flag,stored_last', [
+    (['-y', '@modelcontextprotocol/server-git', '--token', 'ghp_live_secret_123'],
+     'token', REDACTED),
+    (['-y', '@modelcontextprotocol/server-git', '--token=ghp_live_secret_123'],
+     'token', f'--token={REDACTED}'),
+    (['server.py', '--api-key', 'sk-live-123'], 'api-key', REDACTED),
+    (['server.py', '--db-password', 'hunter2'], 'db-password', REDACTED),
+])
+def test_secrets_separated_from_their_flag_are_still_caught(write_json, args, flag, stored_last):
+    # SECRET_FLAG only matched "--token=value". The spaced form is what most CLIs document, and
+    # it slipped through twice: no credential (so no AAR-06) and no redaction, which put the
+    # literal secret in evidence/<agent>.json.
+    cfg = write_json('mcp.json', {'mcpServers': {'git': {'command': 'npx', 'args': args}}})
+    [agent] = load(cfg)
+    assert [c.name for c in agent.credentials] == [f'git.arg.{flag}']
+    assert all(c.hardcoded for c in agent.credentials)
+    assert 'live_secret' not in repr(agent) and 'live-123' not in repr(agent)
+    assert 'hunter2' not in repr(agent)
+    stored = agent.raw['mcpServers']['git']['args']
+    assert stored[-1] == stored_last
+
+
+@pytest.mark.parametrize('args', [
+    ['server.py', '--token', '${GITHUB_TOKEN}'],
+    ['server.py', '--token', '$GITHUB_TOKEN'],
+    ['server.py', '--token', 'op://vault/github/token'],
+    ['server.py', '--token', '--verbose'],            # value missing, not an empty secret
+])
+def test_secret_flags_pointing_at_a_reference_are_left_alone(write_json, args):
+    cfg = write_json('mcp.json', {'mcpServers': {'git': {'command': 'npx', 'args': args}}})
+    [agent] = load(cfg)
+    assert agent.credentials == []
+    assert agent.raw['mcpServers']['git']['args'] == args
+
+
+def test_hosts_in_different_folders_get_distinct_ids(tmp_path):
+    # The id came from the file name alone, so two hosts both named claude_desktop_config.json
+    # produced one id: evidence/<id>.json was written twice (second silently replaced the first)
+    # and the OSCAL results kept only one observation of the two.
+    for folder, package in (('laptop', 'server-filesystem'), ('desktop', 'server-git')):
+        (tmp_path / folder).mkdir()
+        (tmp_path / folder / 'claude_desktop_config.json').write_text(json.dumps({'mcpServers': {
+            folder: {'command': 'npx', 'args': ['-y', f'@modelcontextprotocol/{package}', '/']}}}),
+            encoding='utf-8')
+    agents = discover([tmp_path])
+    assert len({a.id for a in agents}) == 2
+    assert sorted(a.id.rsplit('-claude-desktop-config', 1)[0].rsplit('-', 1)[-1] for a in agents) \
+        == ['desktop', 'laptop']
+
+
+def test_a_unique_id_is_left_alone(tmp_path, write_json):
+    write_json('alpha.json', {'mcpServers': {'fetch': {'command': 'uvx', 'args': ['mcp-server-fetch']}}})
+    write_json('beta.json', {'mcpServers': {'fetch': {'command': 'uvx', 'args': ['mcp-server-fetch']}}})
+    assert [a.id for a in discover([tmp_path])] == ['alpha', 'beta']

@@ -15,6 +15,7 @@ import copy
 import json
 import re
 import sys
+from collections import Counter
 from datetime import date
 from pathlib import Path
 from urllib.parse import urlparse
@@ -31,6 +32,9 @@ SERVERS = {alias: profile for name, profile in CATALOG['servers'].items()
 REDACTED = '***REDACTED***'
 SECRET_NAME = re.compile(r'TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|CREDENTIAL|(^|_)PAT($|_)|AUTH', re.I)
 SECRET_FLAG = re.compile(r'^(--?[\w-]*(?:token|secret|password|api-?key)[\w-]*)=(.+)$', re.I)
+# The same flag on its own, with the secret in the next argument (`--token value`). Most CLIs
+# document this form, so a parser that only understands `--token=value` misses the common case.
+SECRET_FLAG_NAME = re.compile(r'^--?[\w-]*(?:token|secret|password|api-?key)[\w-]*$', re.I)
 DSN_PASSWORD = re.compile(r'^([a-z][a-z0-9+.-]*://[^:/@\s]+:)([^@\s]+)(@)', re.I)
 # docker flags that consume the next argument, so it is not mistaken for the image name
 DOCKER_VALUE_FLAGS = {'-e', '--env', '-v', '--volume', '--name', '--network', '-p', '--publish',
@@ -42,6 +46,25 @@ def is_reference(value: str) -> bool:
     v = str(value).strip()
     return (v == '' or '${' in v or v.startswith(('$', 'op://', 'vault:', 'secretsmanager:', 'env:', '{{'))
             or (v.startswith('<') and v.endswith('>')))
+
+
+def secret_args(args: list[str]) -> list[tuple[int, str, str]]:
+    """Every hardcoded secret passed on a command line, as (index of the value, flag name, value).
+
+    Both spellings count: `--token=value` and `--token value`. The separated form is what most
+    CLIs document, and missing it meant the secret was neither reported as a credential nor
+    masked, so it reached the evidence file verbatim.
+    """
+    found = []
+    for i, arg in enumerate(args):
+        if (m := SECRET_FLAG.match(arg)) and not is_reference(m.group(2)):
+            found.append((i, m.group(1).lstrip('-'), m.group(2)))
+        elif SECRET_FLAG_NAME.match(arg) and i + 1 < len(args):
+            value = args[i + 1]
+            # A following flag means the value is missing, not that it is empty.
+            if not is_reference(value) and not value.startswith('-'):
+                found.append((i + 1, arg.lstrip('-'), value))
+    return found
 
 
 class ConfigError(ValueError):
@@ -71,7 +94,11 @@ def _jsonc(text: str) -> str:
 
 
 def _load(path: Path, source: str) -> list[Agent]:
-    text = path.read_text(encoding='utf-8')
+    # utf-8-sig reads a plain UTF-8 file exactly like utf-8 and also drops a leading byte-order
+    # mark. Editors on Windows (Notepad, PowerShell's Out-File) write one by default, and a BOM
+    # made json.loads fail, which discover() then reported as a skipped file: the agent vanished
+    # from the review without anyone being told why.
+    text = path.read_text(encoding='utf-8-sig')
     if path.suffix.lower() == '.json':
         data = json.loads(_jsonc(text))
         servers = data.get('mcpServers', data.get('servers')) if isinstance(data, dict) else None
@@ -103,6 +130,34 @@ def discover(paths: list[Path]) -> list[Agent]:
             except (ValueError, yaml.YAMLError) as e:
                 # Malformed configs and unrelated files land here; skip, don't abort the review
                 print(f'warning: skipped {f}: {type(e).__name__}: {e}', file=sys.stderr)
+    return _unique_ids(agents)
+
+
+def _unique_ids(agents: list[Agent]) -> list[Agent]:
+    """Give every agent an id no other agent in this run shares.
+
+    The id used to come from the file name alone, so two hosts configured in different folders
+    both produced `claude-desktop-config`: evidence/<id>.json was written twice and the second
+    silently replaced the first, and the OSCAL results kept only one of the two observations.
+    Ids that occur once keep their existing value; colliding ones fall back to their source path,
+    which is already relative to the scanned folder.
+    """
+    counts = Counter(agent.id for agent in agents)
+    taken: set[str] = set()
+    for agent in agents:
+        candidate = agent.id
+        if counts[candidate] > 1:
+            parts = [p for p in str(agent.source).replace('\\', '/').split('/') if p]
+            if parts:
+                parts[-1] = Path(parts[-1]).stem
+            stem = _slug('-'.join(parts)) or candidate
+            candidate, n = stem, 2
+            while candidate in taken:
+                candidate, n = f'{stem}-{n}', n + 1
+        while candidate in taken:
+            candidate = f'{candidate}-2'
+        taken.add(candidate)
+        agent.id = candidate
     return agents
 
 
@@ -141,14 +196,18 @@ def _mcp_server(name: str, spec: dict) -> tuple[Grant, list[Credential]]:
         grant.endpoint = url
         return grant, creds
 
-    package, pinned, args = _package(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
-    for a in args:
+    raw_args = [str(a) for a in spec.get('args', [])]
+    package, pinned, args = _package(spec.get('command', ''), raw_args)
+    # Credentials are looked for in the command line as written: _package() drops the flags
+    # (--token and friends) to get at the server's own arguments, so scanning its result would
+    # only ever see the bare value.
+    for a in raw_args:
         if (m := DSN_PASSWORD.match(a)) and not is_reference(m.group(2)):
             creds.append(Credential(name=f'{name}.connection-string', hardcoded=True))
-        elif (m := SECRET_FLAG.match(a)) and not is_reference(m.group(2)):
-            creds.append(Credential(name=f'{name}.arg.{m.group(1).lstrip("-")}', hardcoded=True))
+    for _, flag, _ in secret_args(raw_args):
+        creds.append(Credential(name=f'{name}.arg.{flag}', hardcoded=True))
     profile = SERVERS.get(package) if package else None
-    resource = package if pinned is not None else ' '.join([spec.get('command', name), *map(redact_arg, args)]).strip()
+    resource = package if pinned is not None else ' '.join([spec.get('command', name), *redact_args(raw_args)]).strip()
     grant = _grant_from_profile(name, profile, resource=resource, args=args)
     grant.package, grant.pinned = package, pinned
     mounts = _docker_mounts(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
@@ -266,7 +325,16 @@ def _redact_server(spec: dict) -> None:
                     and not is_reference(token):
                 spec[block][key] = REDACTED
     if 'args' in spec:
-        spec['args'] = [redact_arg(str(a)) for a in spec['args']]
+        spec['args'] = redact_args([str(a) for a in spec['args']])
+
+
+def redact_args(args: list[str]) -> list[str]:
+    """Mask every hardcoded secret in a command line, keeping the flag readable."""
+    masked = [redact_arg(a) for a in args]
+    for i, _, value in secret_args(args):
+        if masked[i] == value:          # a bare value: "--token value" rather than "--token=value"
+            masked[i] = REDACTED
+    return masked
 
 
 def redact_arg(arg: str) -> str:
