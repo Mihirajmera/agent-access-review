@@ -15,7 +15,7 @@ import copy
 import json
 import re
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -74,13 +74,17 @@ def _load(path: Path, source: str) -> list[Agent]:
     text = path.read_text(encoding='utf-8')
     if path.suffix.lower() == '.json':
         data = json.loads(_jsonc(text))
-        servers = data.get('mcpServers', data.get('servers')) if isinstance(data, dict) else None
-        if isinstance(servers, dict):
-            return [parse_mcp_config(path, data, servers, source)]
-    elif path.suffix.lower() in {'.yaml', '.yml'}:
+    else:
         data = yaml.safe_load(text) or {}
-        if isinstance(data, dict) and isinstance(data.get('agents'), list):
-            return parse_manifest(path, data, source)
+    if not isinstance(data, dict):
+        return []
+    # The format is decided by the document, not by the extension: an agent manifest is a
+    # manifest whether it is saved as YAML or as JSON, and the same holds for an MCP config.
+    servers = data.get('mcpServers', data.get('servers'))
+    if isinstance(servers, dict):
+        return [parse_mcp_config(path, data, servers, source)]
+    if isinstance(data.get('agents'), list):
+        return parse_manifest(path, data, source)
     return []
 
 
@@ -323,7 +327,19 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
 def _date(value) -> date | None:
     if value in (None, ''):
         return None
-    return value if isinstance(value, date) else date.fromisoformat(str(value))
+    # YAML turns an unquoted 2026-10-12 09:00:00 into a datetime, and datetime subclasses date,
+    # so an isinstance(value, date) check would hand a datetime to the checks. They subtract
+    # review dates from these values, which raises TypeError for a datetime. Only the day counts
+    # here -- a rotation is stale in days, not in seconds -- so the time is dropped.
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    text = str(value)
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return datetime.fromisoformat(text.replace('Z', '+00:00')).date()
 
 
 def _slug(s: str) -> str:

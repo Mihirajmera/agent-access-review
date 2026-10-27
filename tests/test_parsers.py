@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import pytest
 
@@ -73,6 +73,37 @@ def test_manifest_example():
     assert fin.approved_on == date(2026, 3, 10)
     assert {c.name for c in fin.credentials} == {'netsuite.NETSUITE_TOKEN', 'sharepoint.GRAPH_CLIENT_SECRET'}
     assert agents['devops-agent'].credentials[0].hardcoded
+
+
+def test_a_manifest_is_a_manifest_in_either_format(tmp_path, write_json):
+    """The document decides the format, not the extension: this used to be YAML-only."""
+    manifest = {'agents': [{'id': 'support-copilot', 'name': 'Support copilot', 'owner': 'platform',
+                            'approved_by': 'platform', 'approved_on': '2026-10-12',
+                            'tools': [{'name': 'tickets', 'resource': 'zendesk', 'actions': ['read']}]}]}
+    as_json = write_json('agents.json', manifest)
+    as_yaml = tmp_path / 'agents.yaml'
+    as_yaml.write_text('agents:\n  - id: support-copilot\n    owner: platform\n', encoding='utf-8')
+    [from_json] = load(as_json)
+    [from_yaml] = load(as_yaml)
+    assert from_json.id == from_yaml.id == 'support-copilot'
+    assert from_json.approved_on == date(2026, 10, 12)
+    assert [g.tool for g in from_json.grants] == ['tickets']
+
+
+def test_a_manifest_may_write_a_full_timestamp(tmp_path):
+    """YAML parses an unquoted timestamp into a datetime, which the checks cannot subtract."""
+    manifest = tmp_path / 'agents.yaml'
+    manifest.write_text('agents:\n'
+                        '  - id: support-copilot\n'
+                        '    owner: platform\n'
+                        '    approved_on: 2026-10-12 09:00:00\n'
+                        '    tools:\n'
+                        '      - name: tickets\n'
+                        '        last_used: 2026-10-10 17:30:00\n', encoding='utf-8')
+    [agent] = load(manifest)
+    assert agent.approved_on == date(2026, 10, 12)
+    assert agent.grants[0].last_used == date(2026, 10, 10)
+    assert not isinstance(agent.approved_on, datetime)
 
 
 def test_discover_skips_unrelated_and_broken_files(tmp_path, write_json, capsys):
