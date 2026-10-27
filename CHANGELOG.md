@@ -5,6 +5,7 @@
 - VS Code `mcp.json` files with comments and trailing commas (JSONC) are now reviewed instead of skipped; malformed input is still rejected (#12, thanks @premsinghsodha7).
 - `scan --format json` prints each agent's findings as one JSON document on stdout for CI and other tools; the review packet and `--fail-on` exit codes are unchanged (#19, thanks @CJstate).
 - The `mcp-server-sqlite`, Brave Search and Google Drive MCP servers are now classified instead of reported as unknown (#20, thanks @CJstate).
+- Fixed: `AAR-11` read the endpoint host with a regex, which took the userinfo for the host — `http://127.0.0.1:80@evil.example.com/sse` was exempted as loopback while it actually connects to `evil.example.com`. The host now comes from `urlsplit`. The same change stops `http://[::1]:8080/sse`, `http://LOCALHOST./sse` and `http://127.0.0.2/sse` from being reported as unencrypted remote traffic when they never leave the machine.
 
 ## 0.2.1 (2026-10-19)
 

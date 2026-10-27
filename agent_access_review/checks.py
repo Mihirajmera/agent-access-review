@@ -2,10 +2,12 @@
 findings; an empty list means the control is satisfied for that agent."""
 from __future__ import annotations
 
+import ipaddress
 import re
 from datetime import date
 from pathlib import Path
 from typing import Callable
+from urllib.parse import urlsplit
 
 import yaml
 
@@ -37,6 +39,32 @@ def check(check_id: str):
 
 def run_all(agent: Agent, as_of: date) -> list[Finding]:
     return [f for cid in sorted(REGISTRY) for f in REGISTRY[cid](agent, as_of)]
+
+
+# A plain-HTTP endpoint on the machine itself never leaves the host, so there is no traffic to
+# encrypt. Everything else over HTTP is a finding.
+LOOPBACK_HOSTS = {'localhost', '127.0.0.1', '::1'}
+
+
+def is_loopback(url: str) -> bool:
+    """True when the URL points at the local machine.
+
+    The host has to come from urlsplit: a regex over the string reads the userinfo as the host,
+    so `http://127.0.0.1:80@evil.example.com/` looked local while it connects to evil.example.com.
+    """
+    try:
+        host = urlsplit(url).hostname
+    except ValueError:                       # malformed authority, e.g. an unclosed IPv6 bracket
+        return False
+    if not host:
+        return False
+    host = host.lower().rstrip('.')
+    if host in LOOPBACK_HOSTS:
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
 
 
 @check('AAR-01')
@@ -177,8 +205,7 @@ def encrypted_transport(agent: Agent, as_of: date) -> list[Finding]:
     for g in agent.grants:
         if not g.endpoint or not g.endpoint.lower().startswith('http://'):
             continue
-        host = re.sub(r'^http://([^/:]+).*$', r'\1', g.endpoint.lower())
-        if host in {'localhost', '127.0.0.1', '[::1]', '::1'}:
+        if is_loopback(g.endpoint):
             continue
         out.append(Finding('AAR-11', 'high', agent.id,
                            f'{g.tool} connects to {g.endpoint} over unencrypted HTTP.',
