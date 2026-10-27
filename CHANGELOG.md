@@ -5,6 +5,7 @@
 - VS Code `mcp.json` files with comments and trailing commas (JSONC) are now reviewed instead of skipped; malformed input is still rejected (#12, thanks @premsinghsodha7).
 - `scan --format json` prints each agent's findings as one JSON document on stdout for CI and other tools; the review packet and `--fail-on` exit codes are unchanged (#19, thanks @CJstate).
 - The `mcp-server-sqlite`, Brave Search and Google Drive MCP servers are now classified instead of reported as unknown (#20, thanks @CJstate).
+- Fixed: a credential embedded in a remote server's URL — a `?api_key=...` style query parameter or a password in the userinfo — is now reported as a hardcoded credential (AAR-06) and masked in the report, the spreadsheet and the evidence. A remote server is configured by URL alone, so that URL was the one place a token could sit unseen: it reached `access-review.md`, `access-review.csv` and `evidence/<agent>.json` verbatim.
 
 ## 0.2.1 (2026-10-19)
 

@@ -17,7 +17,7 @@ import re
 import sys
 from datetime import date
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit, urlunsplit
 
 import yaml
 
@@ -32,6 +32,8 @@ REDACTED = '***REDACTED***'
 SECRET_NAME = re.compile(r'TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|CREDENTIAL|(^|_)PAT($|_)|AUTH', re.I)
 SECRET_FLAG = re.compile(r'^(--?[\w-]*(?:token|secret|password|api-?key)[\w-]*)=(.+)$', re.I)
 DSN_PASSWORD = re.compile(r'^([a-z][a-z0-9+.-]*://[^:/@\s]+:)([^@\s]+)(@)', re.I)
+# A query-string parameter that carries a credential: "?api_key=...", "&access_token=...".
+SECRET_QUERY = re.compile(r'(^|&)([\w.\[\]-]*(?:token|secret|password|api[_-]?key|signature|credential)[\w.\[\]-]*)=([^&]*)', re.I)
 # docker flags that consume the next argument, so it is not mistaken for the image name
 DOCKER_VALUE_FLAGS = {'-e', '--env', '-v', '--volume', '--name', '--network', '-p', '--publish',
                       '--mount', '--env-file', '-w', '--workdir', '-u', '--user', '--entrypoint'}
@@ -46,6 +48,31 @@ def is_reference(value: str) -> bool:
 
 class ConfigError(ValueError):
     """A file in a supported format whose structure isn't what the format requires."""
+
+
+def secret_query_params(url: str) -> list[str]:
+    """Names of the query-string parameters in `url` that carry a credential."""
+    query = urlsplit(str(url)).query
+    return [m.group(2) for m in SECRET_QUERY.finditer(query) if not is_reference(m.group(3))]
+
+
+def url_password(url: str) -> bool:
+    """True when the URL embeds a password in its userinfo (`scheme://user:pass@host`)."""
+    return urlsplit(str(url)).password is not None
+
+
+def redact_url(url: str) -> str:
+    """Mask the password and any credential-bearing query parameter, keeping the URL readable."""
+    parts = urlsplit(str(url))
+    netloc = parts.netloc
+    if parts.password is not None:
+        userinfo, _, host = netloc.rpartition('@')
+        user = userinfo.split(':', 1)[0]
+        netloc = f'{user}:{REDACTED}@{host}'
+    query = SECRET_QUERY.sub(
+        lambda m: f'{m.group(1)}{m.group(2)}={REDACTED}' if not is_reference(m.group(3)) else m.group(0),
+        parts.query)
+    return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
 
 
 def load(path: Path, source: str | None = None) -> list[Agent]:
@@ -135,10 +162,15 @@ def _mcp_server(name: str, spec: dict) -> tuple[Grant, list[Credential]]:
 
     url = spec.get('url')
     if url:                                           # remote server
+        url = str(url)
+        if url_password(url):
+            creds.append(Credential(name=f'{name}.url.password', hardcoded=True))
+        for param in secret_query_params(url):
+            creds.append(Credential(name=f'{name}.url.{param}', hardcoded=True))
         host = urlparse(url).hostname or ''
         profile = CATALOG['remote_hosts'].get(host)
-        grant = _grant_from_profile(name, profile, resource=url, args=[])
-        grant.endpoint = url
+        grant = _grant_from_profile(name, profile, resource=redact_url(url), args=[])
+        grant.endpoint = redact_url(url)
         return grant, creds
 
     package, pinned, args = _package(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
@@ -265,6 +297,8 @@ def _redact_server(spec: dict) -> None:
             if (SECRET_NAME.search(key) or key.lower() in {'authorization', 'x-api-key', 'api-key'}) \
                     and not is_reference(token):
                 spec[block][key] = REDACTED
+    if spec.get('url'):
+        spec['url'] = redact_url(str(spec['url']))
     if 'args' in spec:
         spec['args'] = [redact_arg(str(a)) for a in spec['args']]
 

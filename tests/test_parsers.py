@@ -208,3 +208,50 @@ def test_catalog_classifies_sqlite_brave_gdrive(write_json):
     assert g['gdrive'].category == 'gdrive'
     assert g['gdrive'].actions == {'read'}                                # drive.readonly scope
     assert g['gdrive'].data_classification == 'confidential'
+
+
+@pytest.mark.parametrize('url,param', [
+    ('https://mcp.example.com/sse?api_key=sk-live-abc123', 'api_key'),
+    ('https://mcp.example.com/sse?api-key=sk-live-abc123', 'api-key'),
+    ('https://mcp.example.com/sse?apikey=sk-live-abc123', 'apikey'),
+    ('https://mcp.example.com/sse?team=data&access_token=sk-live-abc123', 'access_token'),
+    ('https://mcp.example.com/sse?value=1&client_secret=sk-live-abc123&page=2', 'client_secret'),
+])
+def test_a_secret_in_the_url_query_is_reported_and_masked(write_json, url, param):
+    # A remote MCP server is configured by URL alone, so the query string is the only place a
+    # token can sit. It used to reach access-review.md, access-review.csv and the evidence file
+    # verbatim, and no check ever saw it.
+    [agent] = load(write_json('mcp.json', {'mcpServers': {'remote': {'url': url}}}))
+    assert [c.name for c in agent.credentials] == [f'remote.url.{param}']
+    assert all(c.hardcoded for c in agent.credentials)
+    assert 'sk-live-abc123' not in agent.grants[0].endpoint
+    assert REDACTED in agent.grants[0].endpoint
+    assert 'sk-live-abc123' not in agent.raw['mcpServers']['remote']['url']
+
+
+def test_a_password_in_the_url_userinfo_is_reported_and_masked(write_json):
+    [agent] = load(write_json('mcp.json', {
+        'mcpServers': {'remote': {'url': 'https://svc:hunter2-REAL@mcp.example.com/sse'}}}))
+    assert [c.name for c in agent.credentials] == ['remote.url.password']
+    assert agent.grants[0].endpoint == f'https://svc:{REDACTED}@mcp.example.com/sse'
+    assert agent.raw['mcpServers']['remote']['url'] == f'https://svc:{REDACTED}@mcp.example.com/sse'
+
+
+@pytest.mark.parametrize('url', [
+    'https://mcp.example.com/sse?api_key=${API_KEY}',        # points at a secret store
+    'https://mcp.example.com/sse?access_token=$ACCESS_TOKEN',
+    'https://mcp.example.com/sse?page=2&team=data',          # nothing secret at all
+    'https://mcp.example.com/a//b/*literal*/?value=,}&page=2',   # query text that only looks odd
+])
+def test_urls_without_a_hardcoded_secret_are_left_alone(write_json, url):
+    [agent] = load(write_json('mcp.json', {'mcpServers': {'remote': {'url': url}}}))
+    assert agent.credentials == []
+    assert agent.grants[0].endpoint == url
+    assert agent.raw['mcpServers']['remote']['url'] == url
+
+
+def test_a_url_secret_raises_a_hardcoded_credential_finding(write_json):
+    from agent_access_review.checks import run_all
+    [agent] = load(write_json('mcp.json', {
+        'mcpServers': {'remote': {'url': 'https://mcp.example.com/sse?api_key=sk-live-abc123'}}}))
+    assert 'AAR-06' in {f.check_id for f in run_all(agent, date(2026, 10, 12))}
