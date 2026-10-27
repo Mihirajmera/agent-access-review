@@ -11,7 +11,7 @@ claude-desktop-config,MCP host (claude_desktop_config.json),,filesystem,filesyst
 claude-desktop-config,MCP host (claude_desktop_config.json),,github,github,ghcr.io/github/github-mcp-server,read write,confidential,True,True,AAR-03 AAR-06 AAR-10,Modify,,,
 claude-desktop-config,MCP host (claude_desktop_config.json),,fetch,fetch,mcp-server-fetch,read,public,True,True,AAR-10,Modify,,,
 claude-desktop-config,MCP host (claude_desktop_config.json),,customers-db,postgres,postgresql://analyst:***REDACTED***@db.internal:5432/customers,read,restricted,False,False,AAR-06,Modify,,,
-claude-desktop-config,MCP host (claude_desktop_config.json),,terminal,shell,@wonderwhy-er/desktop-commander,delete execute read write,confidential,False,False,AAR-03 AAR-05 AAR-10,Modify,,,
+claude-desktop-config,MCP host (claude_desktop_config.json),,terminal,shell,'@wonderwhy-er/desktop-commander,delete execute read write,confidential,False,False,AAR-03 AAR-05 AAR-10,Modify,,,
 claude-desktop-config,MCP host (claude_desktop_config.json),,internal-crm,,python /opt/tools/crm_server.py --api-key=***REDACTED***,unknown,internal,False,False,AAR-06 AAR-12,Investigate,,,
 vscode-mcp,MCP host (vscode-mcp.json),,github,github,https://api.githubcopilot.com/mcp/,read write,confidential,True,True,AAR-03 AAR-07,Modify,,,
 vscode-mcp,MCP host (vscode-mcp.json),,jira,,http://mcp.tools.example.com/jira,unknown,internal,False,False,AAR-07 AAR-11 AAR-12,Investigate,,,

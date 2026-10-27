@@ -2,6 +2,8 @@ import csv
 import json
 from datetime import datetime, timezone
 
+import pytest
+
 from agent_access_review.__main__ import main
 from agent_access_review.checks import run_all
 from agent_access_review.parsers import discover
@@ -81,3 +83,56 @@ def test_demo_runs_on_bundled_examples(tmp_path, capsys):
     assert 'finance-ops-agent' in out and 'Next:' in out
     # sources are recorded relative to the scanned folder, not this machine's install path
     assert '`examples/agents.yaml`' in (tmp_path / 'demo' / 'access-review.md').read_text(encoding='utf-8')
+
+
+def hostile_review(tmp_path, servers):
+    config = tmp_path / 'mcp.json'
+    config.write_text(json.dumps({'mcpServers': servers}), encoding='utf-8')
+    results = [(a, run_all(a, AS_OF)) for a in discover([config])]
+    return write_all(results, tmp_path / 'review', AS_OF, COLLECTED)
+
+
+def a_server(*args):
+    return {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-filesystem', *args]}
+
+
+@pytest.mark.parametrize('name', ['=1+1', '+1+1', '-1+1', '@SUM(1,1)',
+                                  "=cmd|'/c calc'!A1", '\tTAB'])
+def test_a_tool_name_is_never_stored_as_a_spreadsheet_formula(tmp_path, name):
+    """A tool name comes from the config being audited. A reviewer opens the decision sheet in a
+    spreadsheet, so a name starting with =, +, -, @ or a control character would be evaluated as a
+    formula the moment the file is opened."""
+    paths = hostile_review(tmp_path, {name: a_server(name)})
+    rows = list(csv.DictReader(paths['sheet'].open(encoding='utf-8')))
+    assert rows[0]['tool'] == "'" + name
+    assert rows[0]['agent_name'] == 'MCP host (mcp.json)'
+
+
+@pytest.mark.parametrize('name', ['plain', 'github', 'mcp-server-sqlite', 'a=b', 'v1.2.3'])
+def test_an_ordinary_tool_name_is_left_alone(tmp_path, name):
+    paths = hostile_review(tmp_path, {name: a_server(name)})
+    rows = list(csv.DictReader(paths['sheet'].open(encoding='utf-8')))
+    assert rows[0]['tool'] == name
+
+
+def test_a_carriage_return_cannot_break_a_markdown_table_row(tmp_path):
+    """A bare CR would end the row in the middle, pushing the rest of the cells onto a line of
+    their own -- the finding text then renders outside the table."""
+    paths = hostile_review(tmp_path, {'evil\rname': a_server('evil\rname')})
+    raw = paths['report'].read_bytes()
+    assert b'\r' not in raw
+    table_lines = [line for line in raw.decode('utf-8').splitlines() if line.startswith('| evil')]
+    assert len(table_lines) >= 1
+    assert all(line.endswith('|') for line in table_lines)
+
+
+def test_a_pipe_in_a_value_does_not_add_a_column(tmp_path):
+    """The tool name lands in the access-inventory table. An unescaped pipe would shift every
+    later cell one column to the right, so the decision would be read under the wrong heading."""
+    paths = hostile_review(tmp_path, {'a|b': a_server('a|b')})
+    lines = paths['report'].read_text(encoding='utf-8').splitlines()
+    inventory = [line for line in lines if line.startswith('| a\\|b |')]
+    assert inventory, lines
+    header = next(line for line in lines if line.startswith('| Tool | Type | Resource'))
+    assert inventory[0].count('|') - inventory[0].count('\\|') == header.count('|')
+

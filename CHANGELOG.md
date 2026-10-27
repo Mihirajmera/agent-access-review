@@ -5,6 +5,7 @@
 - VS Code `mcp.json` files with comments and trailing commas (JSONC) are now reviewed instead of skipped; malformed input is still rejected (#12, thanks @premsinghsodha7).
 - `scan --format json` prints each agent's findings as one JSON document on stdout for CI and other tools; the review packet and `--fail-on` exit codes are unchanged (#19, thanks @CJstate).
 - The `mcp-server-sqlite`, Brave Search and Google Drive MCP servers are now classified instead of reported as unknown (#20, thanks @CJstate).
+- Fixed: the decision sheet no longer lets a value from the scanned config be read as a spreadsheet formula. `access-review.csv` is opened in Excel, LibreOffice or Sheets, and every cell in it comes from a config this tool did not write — an MCP server named `=cmd|'/c calc'!A1` was evaluated on open. Cells that start with `=`, `+`, `-`, `@`, tab or CR now carry the spreadsheet text marker. A bare CR in a value also no longer ends a Markdown table row early, which used to push the rest of that row's cells outside the table.
 
 ## 0.2.1 (2026-10-19)
 
