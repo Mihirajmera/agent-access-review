@@ -119,6 +119,22 @@ def test_plain_http_remote(governed_agent, as_of):
         assert run_all(governed_agent, as_of) == [], ok
 
 
+def test_every_loopback_spelling_is_exempt(governed_agent, as_of):
+    g = governed_agent.grants[0]
+    for local in ['http://[::1]:8080/sse', 'http://[0:0:0:0:0:0:0:1]/sse',
+                  'http://LOCALHOST./sse', 'http://127.0.0.2:9/sse']:
+        g.endpoint = local
+        assert run_all(governed_agent, as_of) == [], local
+
+
+def test_a_remote_host_cannot_hide_in_the_userinfo(governed_agent, as_of):
+    """A regex over the raw string reads `127.0.0.1` as the host here; urlsplit reads the real one."""
+    g = governed_agent.grants[0]
+    for spoof in ['http://127.0.0.1:80@evil.example.com/sse', 'http://localhost@evil.example.com/sse']:
+        g.endpoint = spoof
+        assert ids(run_all(governed_agent, as_of)) == ['AAR-11'], spoof
+
+
 def test_unclassified_tool(governed_agent, as_of):
     governed_agent.grants[0].known = False
     assert ids(run_all(governed_agent, as_of)) == ['AAR-12']

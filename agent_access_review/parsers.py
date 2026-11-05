@@ -15,9 +15,10 @@ import copy
 import json
 import re
 import sys
-from datetime import date
+from collections import Counter
+from datetime import date, datetime
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit, urlunsplit
 
 import yaml
 
@@ -31,7 +32,12 @@ SERVERS = {alias: profile for name, profile in CATALOG['servers'].items()
 REDACTED = '***REDACTED***'
 SECRET_NAME = re.compile(r'TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|CREDENTIAL|(^|_)PAT($|_)|AUTH', re.I)
 SECRET_FLAG = re.compile(r'^(--?[\w-]*(?:token|secret|password|api-?key)[\w-]*)=(.+)$', re.I)
+# The same flag on its own, with the secret in the next argument (`--token value`). Most CLIs
+# document this form, so a parser that only understands `--token=value` misses the common case.
+SECRET_FLAG_NAME = re.compile(r'^--?[\w-]*(?:token|secret|password|api-?key)[\w-]*$', re.I)
 DSN_PASSWORD = re.compile(r'^([a-z][a-z0-9+.-]*://[^:/@\s]+:)([^@\s]+)(@)', re.I)
+# A query-string parameter that carries a credential: "?api_key=...", "&access_token=...".
+SECRET_QUERY = re.compile(r'(^|&)([\w.\[\]-]*(?:token|secret|password|api[_-]?key|signature|credential)[\w.\[\]-]*)=([^&]*)', re.I)
 # docker flags that consume the next argument, so it is not mistaken for the image name
 DOCKER_VALUE_FLAGS = {'-e', '--env', '-v', '--volume', '--name', '--network', '-p', '--publish',
                       '--mount', '--env-file', '-w', '--workdir', '-u', '--user', '--entrypoint'}
@@ -44,8 +50,52 @@ def is_reference(value: str) -> bool:
             or (v.startswith('<') and v.endswith('>')))
 
 
+def secret_args(args: list[str]) -> list[tuple[int, str, str]]:
+    """Every hardcoded secret passed on a command line, as (index of the value, flag name, value).
+
+    Both spellings count: `--token=value` and `--token value`. The separated form is what most
+    CLIs document, and missing it meant the secret was neither reported as a credential nor
+    masked, so it reached the evidence file verbatim.
+    """
+    found = []
+    for i, arg in enumerate(args):
+        if (m := SECRET_FLAG.match(arg)) and not is_reference(m.group(2)):
+            found.append((i, m.group(1).lstrip('-'), m.group(2)))
+        elif SECRET_FLAG_NAME.match(arg) and i + 1 < len(args):
+            value = args[i + 1]
+            # A following flag means the value is missing, not that it is empty.
+            if not is_reference(value) and not value.startswith('-'):
+                found.append((i + 1, arg.lstrip('-'), value))
+    return found
+
+
 class ConfigError(ValueError):
     """A file in a supported format whose structure isn't what the format requires."""
+
+
+def secret_query_params(url: str) -> list[str]:
+    """Names of the query-string parameters in `url` that carry a credential."""
+    query = urlsplit(str(url)).query
+    return [m.group(2) for m in SECRET_QUERY.finditer(query) if not is_reference(m.group(3))]
+
+
+def url_password(url: str) -> bool:
+    """True when the URL embeds a password in its userinfo (`scheme://user:pass@host`)."""
+    return urlsplit(str(url)).password is not None
+
+
+def redact_url(url: str) -> str:
+    """Mask the password and any credential-bearing query parameter, keeping the URL readable."""
+    parts = urlsplit(str(url))
+    netloc = parts.netloc
+    if parts.password is not None:
+        userinfo, _, host = netloc.rpartition('@')
+        user = userinfo.split(':', 1)[0]
+        netloc = f'{user}:{REDACTED}@{host}'
+    query = SECRET_QUERY.sub(
+        lambda m: f'{m.group(1)}{m.group(2)}={REDACTED}' if not is_reference(m.group(3)) else m.group(0),
+        parts.query)
+    return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
 
 
 def load(path: Path, source: str | None = None) -> list[Agent]:
@@ -71,16 +121,24 @@ def _jsonc(text: str) -> str:
 
 
 def _load(path: Path, source: str) -> list[Agent]:
-    text = path.read_text(encoding='utf-8')
+    # utf-8-sig reads a plain UTF-8 file exactly like utf-8 and also drops a leading byte-order
+    # mark. Editors on Windows (Notepad, PowerShell's Out-File) write one by default, and a BOM
+    # made json.loads fail, which discover() then reported as a skipped file: the agent vanished
+    # from the review without anyone being told why.
+    text = path.read_text(encoding='utf-8-sig')
     if path.suffix.lower() == '.json':
         data = json.loads(_jsonc(text))
-        servers = data.get('mcpServers', data.get('servers')) if isinstance(data, dict) else None
-        if isinstance(servers, dict):
-            return [parse_mcp_config(path, data, servers, source)]
-    elif path.suffix.lower() in {'.yaml', '.yml'}:
+    else:
         data = yaml.safe_load(text) or {}
-        if isinstance(data, dict) and isinstance(data.get('agents'), list):
-            return parse_manifest(path, data, source)
+    if not isinstance(data, dict):
+        return []
+    # The format is decided by the document, not by the extension: an agent manifest is a
+    # manifest whether it is saved as YAML or as JSON, and the same holds for an MCP config.
+    servers = data.get('mcpServers', data.get('servers'))
+    if isinstance(servers, dict):
+        return [parse_mcp_config(path, data, servers, source)]
+    if isinstance(data.get('agents'), list):
+        return parse_manifest(path, data, source)
     return []
 
 
@@ -103,6 +161,34 @@ def discover(paths: list[Path]) -> list[Agent]:
             except (ValueError, yaml.YAMLError) as e:
                 # Malformed configs and unrelated files land here; skip, don't abort the review
                 print(f'warning: skipped {f}: {type(e).__name__}: {e}', file=sys.stderr)
+    return _unique_ids(agents)
+
+
+def _unique_ids(agents: list[Agent]) -> list[Agent]:
+    """Give every agent an id no other agent in this run shares.
+
+    The id used to come from the file name alone, so two hosts configured in different folders
+    both produced `claude-desktop-config`: evidence/<id>.json was written twice and the second
+    silently replaced the first, and the OSCAL results kept only one of the two observations.
+    Ids that occur once keep their existing value; colliding ones fall back to their source path,
+    which is already relative to the scanned folder.
+    """
+    counts = Counter(agent.id for agent in agents)
+    taken: set[str] = set()
+    for agent in agents:
+        candidate = agent.id
+        if counts[candidate] > 1:
+            parts = [p for p in str(agent.source).replace('\\', '/').split('/') if p]
+            if parts:
+                parts[-1] = Path(parts[-1]).stem
+            stem = _slug('-'.join(parts)) or candidate
+            candidate, n = stem, 2
+            while candidate in taken:
+                candidate, n = f'{stem}-{n}', n + 1
+        while candidate in taken:
+            candidate = f'{candidate}-2'
+        taken.add(candidate)
+        agent.id = candidate
     return agents
 
 
@@ -135,20 +221,29 @@ def _mcp_server(name: str, spec: dict) -> tuple[Grant, list[Credential]]:
 
     url = spec.get('url')
     if url:                                           # remote server
+        url = str(url)
+        if url_password(url):
+            creds.append(Credential(name=f'{name}.url.password', hardcoded=True))
+        for param in secret_query_params(url):
+            creds.append(Credential(name=f'{name}.url.{param}', hardcoded=True))
         host = urlparse(url).hostname or ''
         profile = CATALOG['remote_hosts'].get(host)
-        grant = _grant_from_profile(name, profile, resource=url, args=[])
-        grant.endpoint = url
+        grant = _grant_from_profile(name, profile, resource=redact_url(url), args=[])
+        grant.endpoint = redact_url(url)
         return grant, creds
 
-    package, pinned, args = _package(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
-    for a in args:
+    raw_args = [str(a) for a in spec.get('args', [])]
+    package, pinned, args = _package(spec.get('command', ''), raw_args)
+    # Credentials are looked for in the command line as written: _package() drops the flags
+    # (--token and friends) to get at the server's own arguments, so scanning its result would
+    # only ever see the bare value.
+    for a in raw_args:
         if (m := DSN_PASSWORD.match(a)) and not is_reference(m.group(2)):
             creds.append(Credential(name=f'{name}.connection-string', hardcoded=True))
-        elif (m := SECRET_FLAG.match(a)) and not is_reference(m.group(2)):
-            creds.append(Credential(name=f'{name}.arg.{m.group(1).lstrip("-")}', hardcoded=True))
+    for _, flag, _ in secret_args(raw_args):
+        creds.append(Credential(name=f'{name}.arg.{flag}', hardcoded=True))
     profile = SERVERS.get(package) if package else None
-    resource = package if pinned is not None else ' '.join([spec.get('command', name), *map(redact_arg, args)]).strip()
+    resource = package if pinned is not None else ' '.join([spec.get('command', name), *redact_args(raw_args)]).strip()
     grant = _grant_from_profile(name, profile, resource=resource, args=args)
     grant.package, grant.pinned = package, pinned
     mounts = _docker_mounts(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
@@ -265,8 +360,19 @@ def _redact_server(spec: dict) -> None:
             if (SECRET_NAME.search(key) or key.lower() in {'authorization', 'x-api-key', 'api-key'}) \
                     and not is_reference(token):
                 spec[block][key] = REDACTED
+    if spec.get('url'):
+        spec['url'] = redact_url(str(spec['url']))
     if 'args' in spec:
-        spec['args'] = [redact_arg(str(a)) for a in spec['args']]
+        spec['args'] = redact_args([str(a) for a in spec['args']])
+
+
+def redact_args(args: list[str]) -> list[str]:
+    """Mask every hardcoded secret in a command line, keeping the flag readable."""
+    masked = [redact_arg(a) for a in args]
+    for i, _, value in secret_args(args):
+        if masked[i] == value:          # a bare value: "--token value" rather than "--token=value"
+            masked[i] = REDACTED
+    return masked
 
 
 def redact_arg(arg: str) -> str:
@@ -279,6 +385,46 @@ def redact_arg(arg: str) -> str:
 
 
 # --------------------------------------------------------------------------- manifests
+
+def _as_list(value) -> list:
+    """A manifest field that means a list, written either as a list or as one value.
+
+    `actions: delete` and `actions: [delete]` say the same thing to the person who wrote them.
+    Treating the first as a string turned it into {'d','e','l','t','e'} -- none of which is a
+    privileged action -- so AAR-03 stayed silent on a grant that can delete. `scopes: repo`
+    became {'r','e','p','o'}, which matches no broad scope, so AAR-04 stayed silent too. The
+    same shape reaches the report, where the review shows a scope per letter.
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, (list, tuple, set)):
+        return list(value)
+    return [value]
+
+
+TRUE_WORDS = {'true', 'yes', 'y', '1', 'on'}
+FALSE_WORDS = {'false', 'no', 'n', '0', 'off'}
+
+
+def _as_bool(value, unknown: bool) -> bool:
+    """A manifest flag, written as a YAML boolean or as the word for one.
+
+    `sandboxed: "false"` is a string, and bool('false') is True -- so a quoted false read as
+    "sandboxed", and AAR-05 passed a tool that executes commands on the host. A quoted "no"
+    read as "needs approval", and AAR-03 passed a delete grant. A word that is neither true nor
+    false becomes `unknown`, which each caller sets to the answer that keeps its check firing:
+    not sandboxed and no approval, but untrusted input and egress -- so a typo cannot silence
+    AAR-09 either.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        word = value.strip().lower()
+        return True if word in TRUE_WORDS else False if word in FALSE_WORDS else unknown
+    return bool(value)
+
 
 def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Agent]:
     agents = []
@@ -297,13 +443,13 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
             agent.grants.append(Grant(
                 tool=t['name'],
                 resource=t.get('resource', t['name']),
-                actions=set(t.get('actions', ['read'])),
-                scopes=list(t.get('scopes', [])),
+                actions=set(_as_list(t.get('actions', ['read']))),
+                scopes=_as_list(t.get('scopes')),
                 data_classification=t.get('data_classification', 'internal'),
-                untrusted_input=bool(t.get('untrusted_input', False)),
-                egress=bool(t.get('egress', False)),
-                requires_approval=bool(t.get('requires_approval', False)),
-                sandboxed=bool(t.get('sandboxed', False)),
+                untrusted_input=_as_bool(t.get('untrusted_input', False), unknown=True),
+                egress=_as_bool(t.get('egress', False), unknown=True),
+                requires_approval=_as_bool(t.get('requires_approval', False), unknown=False),
+                sandboxed=_as_bool(t.get('sandboxed', False), unknown=False),
                 last_used=_date(t.get('last_used')),
                 package=t.get('package'),
                 pinned=t.get('pinned'),
@@ -323,7 +469,19 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
 def _date(value) -> date | None:
     if value in (None, ''):
         return None
-    return value if isinstance(value, date) else date.fromisoformat(str(value))
+    # YAML turns an unquoted 2026-10-12 09:00:00 into a datetime, and datetime subclasses date,
+    # so an isinstance(value, date) check would hand a datetime to the checks. They subtract
+    # review dates from these values, which raises TypeError for a datetime. Only the day counts
+    # here -- a rotation is stale in days, not in seconds -- so the time is dropped.
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    text = str(value)
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return datetime.fromisoformat(text.replace('Z', '+00:00')).date()
 
 
 def _slug(s: str) -> str:
