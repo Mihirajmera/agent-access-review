@@ -8,6 +8,7 @@
 - Fixed: a secret passed as `--token value` (space separated, which is how most CLIs document it) is now reported as a hardcoded credential and redacted. Only `--token=value` was recognised, so the spaced form reached `evidence/<agent>.json` verbatim.
 - Fixed: configs saved with a UTF-8 byte-order mark are now read. Notepad and PowerShell's `Out-File` write one by default on Windows, and the BOM made the file unreadable, which `discover()` reported as skipped: the host silently disappeared from the review.
 - Fixed: two hosts configured in different folders no longer share one agent id. `evidence/<id>.json` was written twice, so the second overwrote the first and the OSCAL results kept only one observation.
+- Fixed: a credential embedded in a remote server's URL — a `?api_key=...` style query parameter or a password in the userinfo — is now reported as a hardcoded credential (AAR-06) and masked in the report, the spreadsheet and the evidence. A remote server is configured by URL alone, so that URL was the one place a token could sit unseen: it reached `access-review.md`, `access-review.csv` and `evidence/<agent>.json` verbatim.
 
 ## 0.2.1 (2026-10-19)
 
