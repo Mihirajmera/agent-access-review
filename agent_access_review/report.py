@@ -60,7 +60,24 @@ def counts(findings: list[Finding]) -> Counter:
 
 
 def _cell(value) -> str:
-    return str(value).replace('|', '\\|').replace('\n', ' ')
+    """One markdown table cell. A pipe would start a new column and a bare CR would end the
+    row, so both are neutralised; a config value can contain either."""
+    return str(value).replace('|', '\\|').replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
+
+
+# A value a spreadsheet would treat as a formula rather than as text. Excel, LibreOffice and
+# Sheets all evaluate a cell that starts with one of these, and a tool name comes straight out
+# of the config being audited -- so an MCP server called "=cmd|'/c calc'!A1" runs when the
+# reviewer opens the decision sheet.
+FORMULA_LEAD = ('=', '+', '-', '@', '\t', '\r')
+
+
+def _spreadsheet_cell(value) -> str:
+    """Neutralise a value so a spreadsheet stores it as text, not as a formula."""
+    text = str(value)
+    if text.startswith(FORMULA_LEAD):
+        return "'" + text
+    return text
 
 
 def _frameworks(check_id: str) -> str:
@@ -133,9 +150,10 @@ def write_csv(results, path: Path) -> Path:
         for agent, findings in results:
             for g in agent.grants:
                 ids = sorted({f.check_id for f in findings if f.tool == g.tool})
-                w.writerow([agent.id, agent.name, agent.owner or '', g.tool, g.category or '', g.resource,
-                            ' '.join(sorted(g.actions)), g.data_classification, g.untrusted_input,
-                            g.egress, ' '.join(ids), grant_decision(g, findings), '', '', ''])
+                w.writerow([_spreadsheet_cell(v) for v in [
+                    agent.id, agent.name, agent.owner or '', g.tool, g.category or '', g.resource,
+                    ' '.join(sorted(g.actions)), g.data_classification, g.untrusted_input,
+                    g.egress, ' '.join(ids), grant_decision(g, findings), '', '', '']])
     return path
 
 

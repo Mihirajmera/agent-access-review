@@ -9,6 +9,7 @@
 - Fixed: configs saved with a UTF-8 byte-order mark are now read. Notepad and PowerShell's `Out-File` write one by default on Windows, and the BOM made the file unreadable, which `discover()` reported as skipped: the host silently disappeared from the review.
 - Fixed: two hosts configured in different folders no longer share one agent id. `evidence/<id>.json` was written twice, so the second overwrote the first and the OSCAL results kept only one observation.
 - Fixed: a credential embedded in a remote server's URL — a `?api_key=...` style query parameter or a password in the userinfo — is now reported as a hardcoded credential (AAR-06) and masked in the report, the spreadsheet and the evidence. A remote server is configured by URL alone, so that URL was the one place a token could sit unseen: it reached `access-review.md`, `access-review.csv` and `evidence/<agent>.json` verbatim.
+- Fixed: the decision sheet no longer lets a value from the scanned config be read as a spreadsheet formula. `access-review.csv` is opened in Excel, LibreOffice or Sheets, and every cell in it comes from a config this tool did not write — an MCP server named `=cmd|'/c calc'!A1` was evaluated on open. Cells that start with `=`, `+`, `-`, `@`, tab or CR now carry the spreadsheet text marker. A bare CR in a value also no longer ends a Markdown table row early, which used to push the rest of that row's cells outside the table.
 
 ## 0.2.1 (2026-10-19)
 
