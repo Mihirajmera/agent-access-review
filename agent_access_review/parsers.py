@@ -16,8 +16,6 @@ import json
 import re
 import sys
 from collections import Counter
-from datetime import date
-
 from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlparse, urlsplit, urlunsplit
@@ -406,18 +404,25 @@ def _as_list(value) -> list:
     return [value]
 
 
-def _as_bool(value) -> bool:
+TRUE_WORDS = {'true', 'yes', 'y', '1', 'on'}
+FALSE_WORDS = {'false', 'no', 'n', '0', 'off'}
+
+
+def _as_bool(value, unknown: bool) -> bool:
     """A manifest flag, written as a YAML boolean or as the word for one.
 
     `sandboxed: "false"` is a string, and bool('false') is True -- so a quoted false read as
     "sandboxed", and AAR-05 passed a tool that executes commands on the host. A quoted "no"
-    read as "needs approval", and AAR-03 passed a delete grant. Anything unrecognised is
-    treated as the safe answer (no approval, not sandboxed), so a typo cannot silence a check.
+    read as "needs approval", and AAR-03 passed a delete grant. A word that is neither true nor
+    false becomes `unknown`, which each caller sets to the answer that keeps its check firing:
+    not sandboxed and no approval, but untrusted input and egress -- so a typo cannot silence
+    AAR-09 either.
     """
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        return value.strip().lower() in {'true', 'yes', 'y', '1', 'on'}
+        word = value.strip().lower()
+        return True if word in TRUE_WORDS else False if word in FALSE_WORDS else unknown
     return bool(value)
 
 
@@ -441,10 +446,10 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
                 actions=set(_as_list(t.get('actions', ['read']))),
                 scopes=_as_list(t.get('scopes')),
                 data_classification=t.get('data_classification', 'internal'),
-                untrusted_input=_as_bool(t.get('untrusted_input', False)),
-                egress=_as_bool(t.get('egress', False)),
-                requires_approval=_as_bool(t.get('requires_approval', False)),
-                sandboxed=_as_bool(t.get('sandboxed', False)),
+                untrusted_input=_as_bool(t.get('untrusted_input', False), unknown=True),
+                egress=_as_bool(t.get('egress', False), unknown=True),
+                requires_approval=_as_bool(t.get('requires_approval', False), unknown=False),
+                sandboxed=_as_bool(t.get('sandboxed', False), unknown=False),
                 last_used=_date(t.get('last_used')),
                 package=t.get('package'),
                 pinned=t.get('pinned'),

@@ -106,6 +106,13 @@ def test_a_flag_may_be_written_as_a_word(tmp_path, value, expected):
     assert _manifest(tmp_path, f'        actions: [execute]\n        sandboxed: {value}\n').sandboxed is expected
 
 
+@pytest.mark.parametrize('field', ['untrusted_input', 'egress'])
+def test_an_unrecognised_exfiltration_flag_counts_as_set(tmp_path, field):
+    """For these two flags the answer that keeps AAR-09 firing is True, not False."""
+    g = _manifest(tmp_path, f'        {field}: sometimes\n')
+    assert getattr(g, field) is True
+
+
 def test_an_unrecognised_flag_is_the_safe_answer(tmp_path):
     """A typo must not silence a check, so it falls back to "no approval, not sandboxed"."""
     g = _manifest(tmp_path, '        actions: [execute]\n        sandboxed: sometimes\n')
