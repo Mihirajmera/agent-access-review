@@ -1,6 +1,6 @@
 # AI Agent Access Review: 2026-10-12
 
-**5 agents**, **16 tool grants**, **41 findings** (26 high, 10 medium, 5 low).
+**5 agents**, **16 tool grants**, **42 findings** (27 high, 10 medium, 5 low).
 
 ## Agents
 
@@ -9,7 +9,7 @@
 | [Customer Support Copilot](#support-copilot) | `agents.yaml` | priya.shah@example.com | 2026-08-20 by ai-review-board | 2 | 0 | 0 | 0 |
 | [Finance Ops Agent](#finance-ops-agent) | `agents.yaml` | marco.diaz@example.com | 2026-03-10 by cfo-office | 4 | 4 | 3 | 0 |
 | [DevOps Auto-Remediation Agent](#devops-agent) | `agents.yaml` | **none** | **none** | 2 | 6 | 1 | 1 |
-| [MCP host (claude_desktop_config.json)](#claude-desktop-config) | `claude_desktop_config.json` | **none** | **none** | 6 | 11 | 5 | 1 |
+| [MCP host (claude_desktop_config.json)](#claude-desktop-config) | `claude_desktop_config.json` | **none** | **none** | 6 | 12 | 5 | 1 |
 | [MCP host (vscode-mcp.json)](#vscode-mcp) | `vscode-mcp.json` | **none** | **none** | 2 | 5 | 1 | 3 |
 
 ## Control results
@@ -28,6 +28,7 @@
 | AAR-10 | Tool packages are pinned to a version | 2 / 5 | NIST 800-53 SR-3; OWASP LLM LLM03 |
 | AAR-11 | Remote tools use encrypted transport | 1 / 5 | NIST 800-53 SC-8; SOC 2 CC6.7 |
 | AAR-12 | Every tool's capabilities are inventoried | 2 / 5 | NIST 800-53 CM-8; NIST AI RMF GOVERN 1.6 |
+| AAR-13 | Tool servers are still maintained upstream | 1 / 5 | NIST 800-53 SA-22, SI-2; SOC 2 CC7.1; OWASP LLM LLM03 |
 
 ---
 
@@ -38,7 +39,7 @@
 - **Source:** `examples/agents.yaml`
 - **Owner:** priya.shah@example.com
 - **Approval:** ai-review-board on 2026-08-20
-- **Evidence:** `evidence/support-copilot.json` (sha256 `eaec30aa8c4b88f6…`)
+- **Evidence:** `evidence/support-copilot.json` (sha256 `6da1dad565265adb…`)
 
 ### Access inventory
 
@@ -69,7 +70,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/agents.yaml`
 - **Owner:** marco.diaz@example.com
 - **Approval:** cfo-office on 2026-03-10
-- **Evidence:** `evidence/finance-ops-agent.json` (sha256 `2d8df8e3ad1e1181…`)
+- **Evidence:** `evidence/finance-ops-agent.json` (sha256 `a2977c142ace3bdf…`)
 
 ### Access inventory
 
@@ -110,7 +111,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/agents.yaml`
 - **Owner:** none recorded
 - **Approval:** none recorded
-- **Evidence:** `evidence/devops-agent.json` (sha256 `ea02c9577a756cc2…`)
+- **Evidence:** `evidence/devops-agent.json` (sha256 `ae079942824c8bc4…`)
 
 ### Access inventory
 
@@ -150,7 +151,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/claude_desktop_config.json`
 - **Owner:** none recorded
 - **Approval:** none recorded
-- **Evidence:** `evidence/claude-desktop-config.json` (sha256 `8c3873a758992e74…`)
+- **Evidence:** `evidence/claude-desktop-config.json` (sha256 `73da979da5a01e94…`)
 
 ### Access inventory
 
@@ -178,6 +179,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 | AAR-06 | high | customers-db | Credential customers-db.connection-string is stored in plain text in the agent configuration. | Revoke and reissue it, then load it from a secret manager or environment reference. |
 | AAR-06 | high | internal-crm | Credential internal-crm.arg.api-key is stored in plain text in the agent configuration. | Revoke and reissue it, then load it from a secret manager or environment reference. |
 | AAR-09 | high | (agent) | Exfiltration path: reads sensitive data (customers-db, filesystem, github, terminal), ingests untrusted content (fetch, github) and can send data out (fetch, github) with no human approval. A prompt injection in the untrusted content could leak the data. | Break the chain: split the agent, remove one leg, or require approval on every egress action. |
+| AAR-13 | high | customers-db | customers-db runs @modelcontextprotocol/server-postgres, which is deprecated or archived upstream and no longer receives security fixes. | No maintained replacement is listed: find one, or remove this server and record the decision. |
 | AAR-10 | medium | filesystem | filesystem runs @modelcontextprotocol/server-filesystem without a pinned version, so a new upstream release runs automatically. | Pin an exact version (npm/PyPI) or image digest and update it through change control. |
 | AAR-10 | medium | github | github runs ghcr.io/github/github-mcp-server without a pinned version, so a new upstream release runs automatically. | Pin an exact version (npm/PyPI) or image digest and update it through change control. |
 | AAR-10 | medium | fetch | fetch runs mcp-server-fetch without a pinned version, so a new upstream release runs automatically. | Pin an exact version (npm/PyPI) or image digest and update it through change control. |
@@ -203,7 +205,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/vscode-mcp.json`
 - **Owner:** none recorded
 - **Approval:** none recorded
-- **Evidence:** `evidence/vscode-mcp.json` (sha256 `7be1e8fe98ff4905…`)
+- **Evidence:** `evidence/vscode-mcp.json` (sha256 `f3cff3df3ac8ea5a…`)
 
 ### Access inventory
 

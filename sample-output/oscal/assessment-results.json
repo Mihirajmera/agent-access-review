@@ -43,7 +43,13 @@
                   "control-id": "ia-5"
                 },
                 {
+                  "control-id": "sa-22"
+                },
+                {
                   "control-id": "sc-8"
+                },
+                {
+                  "control-id": "si-2"
                 },
                 {
                   "control-id": "sr-3"
@@ -77,7 +83,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "eaec30aa8c4b88f6b88f6e6a159729d829145b73dee8e5af1d1e71000b6dc869"
+                    "value": "6da1dad565265adb94476fc1de816537b5b3a78c61779a4de0ccbc6f73cc4069"
                   }
                 ]
               }
@@ -108,7 +114,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "2d8df8e3ad1e118163d8470d3037b5b7d1cf8485ecf7d213cab68a5bd60bc200"
+                    "value": "a2977c142ace3bdf4bf73bb47490f467f0c934fb81b56652a2692b1af97f9538"
                   }
                 ]
               }
@@ -139,7 +145,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "ea02c9577a756cc298578662deaa208d3e355cc13f89d9b3a5e9429359120e17"
+                    "value": "ae079942824c8bc401fa264cf5bca0aef12ab38d28b4daaf61f7ce29f8dad6f9"
                   }
                 ]
               }
@@ -149,7 +155,7 @@
           {
             "uuid": "2582ddd8-5db1-5213-a42e-3a3e0a861c1c",
             "title": "Access review of MCP host (claude_desktop_config.json)",
-            "description": "6 tool grants, 17 findings.",
+            "description": "6 tool grants, 18 findings.",
             "methods": [
               "EXAMINE"
             ],
@@ -170,7 +176,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "8c3873a758992e743471dcd787f8b77e6ca1810393400e07fd9a8ae1a184ed5a"
+                    "value": "73da979da5a01e945663b7697c01a39038366a24c4f347439a03c5b50eeb6ecf"
                   }
                 ]
               }
@@ -201,7 +207,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "7be1e8fe98ff49055d4e3bd463c8b57a78b940cad2c3bd842602e0970a2adcdf"
+                    "value": "f3cff3df3ac8ea5ae07859e88a22d11e03c722e88b53cfe91d34b88840cb9bdf"
                   }
                 ]
               }
@@ -378,6 +384,23 @@
             ]
           },
           {
+            "uuid": "9110dfff-d068-5a88-81ad-89f781721748",
+            "title": "SA-22: AAR-13",
+            "description": "Tool servers are still maintained upstream",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sa-22",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "2582ddd8-5db1-5213-a42e-3a3e0a861c1c"
+              }
+            ]
+          },
+          {
             "uuid": "cd865fd1-54af-5958-b4ca-dbc0e57813ee",
             "title": "SC-8: AAR-11",
             "description": "Remote tools use encrypted transport",
@@ -391,6 +414,23 @@
             "related-observations": [
               {
                 "observation-uuid": "6374d630-d029-599d-99cf-e09a14a0b1c0"
+              }
+            ]
+          },
+          {
+            "uuid": "830ed940-d94c-5e3c-9982-bf4157b7eeb0",
+            "title": "SI-2: AAR-13",
+            "description": "Tool servers are still maintained upstream",
+            "target": {
+              "type": "objective-id",
+              "target-id": "si-2",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "2582ddd8-5db1-5213-a42e-3a3e0a861c1c"
               }
             ]
           },

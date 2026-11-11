@@ -30,7 +30,7 @@ def test_evidence_hash_detects_tampering(tmp_path):
 def test_evidence_lists_every_check(tmp_path):
     _, paths = review(tmp_path)
     record = json.loads(paths['evidence:support-copilot'].read_text(encoding='utf-8'))
-    assert [r['status'] for r in record['results']] == ['PASS'] * 12
+    assert [r['status'] for r in record['results']] == ['PASS'] * 13
 
 
 def test_no_secret_in_any_output(tmp_path):
@@ -59,7 +59,7 @@ def test_oscal_findings(tmp_path):
     assert len(result['observations']) == 5
     states = {f['target']['target-id']: f['target']['status']['state'] for f in result['findings']}
     assert states['ac-2.3'] == 'not-satisfied'
-    assert set(states) == {'ac-2', 'ac-2.3', 'ac-4', 'ac-6', 'cm-7', 'cm-8', 'ia-5', 'sc-8', 'sr-3'}
+    assert set(states) == {'ac-2', 'ac-2.3', 'ac-4', 'ac-6', 'cm-7', 'cm-8', 'ia-5', 'sa-22', 'sc-8', 'si-2', 'sr-3'}
     obs_ids = {o['uuid'] for o in result['observations']}
     assert all(r['observation-uuid'] in obs_ids for f in result['findings'] for r in f['related-observations'])
 

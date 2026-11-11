@@ -89,3 +89,10 @@ controls:
     soc2: []
     nist_ai_rmf: [GOVERN 1.6]
     owasp_llm: []
+
+  AAR-13:
+    title: Tool servers are still maintained upstream
+    nist_800_53: [SA-22, SI-2]
+    soc2: [CC7.1]
+    nist_ai_rmf: []
+    owasp_llm: [LLM03]

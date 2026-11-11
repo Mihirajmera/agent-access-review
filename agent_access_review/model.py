@@ -29,6 +29,8 @@ class Grant:
     endpoint: str | None = None              # remote MCP URL
     known: bool = True                       # False when capabilities could not be classified
     category: str | None = None              # capability profile from catalog.yaml (filesystem, shell, ...)
+    deprecated: bool = False                 # the package is deprecated or its repository archived
+    replacement: str | None = None           # the maintained server to move to, when there is one
 
     @property
     def privileged(self) -> set[str]:

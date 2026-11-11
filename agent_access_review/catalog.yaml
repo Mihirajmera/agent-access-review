@@ -9,6 +9,11 @@
 #   egress:               the tool can move data outside the organization
 #   resource_from:        how to name the resource: paths (filesystem args) | dsn (connection string)
 #   aliases:              other names the same server runs under (official Docker image, uvx name)
+#   deprecated:           the package is deprecated or its repository archived: no more security fixes (AAR-13)
+#   replacement:          the maintained server to move to, when one exists
+#
+# The reference servers moved to modelcontextprotocol/servers-archived in 2025 and their npm
+# packages are marked deprecated. Status checked against the npm registry on 2026-11-11.
 
 servers:
   "@modelcontextprotocol/server-filesystem":
@@ -24,6 +29,8 @@ servers:
     data_classification: confidential
     untrusted_input: true
     egress: true
+    deprecated: true
+    replacement: "ghcr.io/github/github-mcp-server"
 
   "ghcr.io/github/github-mcp-server":
     tool: github
@@ -38,6 +45,7 @@ servers:
     actions: [read]
     data_classification: restricted
     resource_from: dsn
+    deprecated: true
 
   "@modelcontextprotocol/server-slack":
     tool: slack
@@ -45,6 +53,7 @@ servers:
     data_classification: confidential
     untrusted_input: true
     egress: true
+    deprecated: true
 
   "mcp-server-fetch":
     tool: fetch
@@ -61,6 +70,8 @@ servers:
     data_classification: public
     untrusted_input: true
     egress: true
+    deprecated: true
+    replacement: "@playwright/mcp"
 
   "@playwright/mcp":
     tool: browser
@@ -104,11 +115,72 @@ servers:
     data_classification: public
     untrusted_input: true               # search results are outsider-authored content
     egress: true                        # search queries leave the organization
+    deprecated: true
+    replacement: "@brave/brave-search-mcp-server"
 
   "@modelcontextprotocol/server-gdrive":
     tool: gdrive
     actions: [read]                     # search + read-only file access (drive.readonly OAuth scope)
     data_classification: confidential
+    deprecated: true
+
+  "@brave/brave-search-mcp-server":
+    tool: brave-search
+    actions: [read]
+    data_classification: public
+    untrusted_input: true
+    egress: true
+
+  "@modelcontextprotocol/server-redis":
+    tool: redis
+    aliases: [mcp/redis]
+    actions: [read, write, delete]      # set, get, delete, list
+    data_classification: confidential
+    deprecated: true
+    replacement: "redis-mcp-server"
+
+  "redis-mcp-server":                   # redis/mcp-redis, maintained by Redis
+    tool: redis
+    actions: [read, write, delete]
+    data_classification: confidential
+
+  "@modelcontextprotocol/server-google-maps":
+    tool: google-maps
+    aliases: [mcp/google-maps]
+    actions: [read]                     # geocoding, places, directions
+    data_classification: public
+    egress: true                        # queries go to the Maps API
+    deprecated: true
+
+  "@modelcontextprotocol/server-gitlab":
+    tool: gitlab
+    aliases: [mcp/gitlab]
+    actions: [read, write]              # files, issues, merge requests, branches
+    data_classification: confidential
+    untrusted_input: true
+    egress: true
+    deprecated: true
+
+  "@modelcontextprotocol/server-aws-kb-retrieval":
+    tool: aws-kb-retrieval
+    aliases: [mcp/aws-kb-retrieval-server]
+    actions: [read]
+    data_classification: confidential
+    deprecated: true
+    replacement: "awslabs.bedrock-kb-retrieval-mcp-server"
+
+  "awslabs.bedrock-kb-retrieval-mcp-server":
+    tool: aws-kb-retrieval
+    actions: [read]
+    data_classification: confidential
+
+  "@modelcontextprotocol/server-everart":
+    tool: everart
+    aliases: [mcp/everart]
+    actions: [read, send]               # sends prompts to EverArt, returns images
+    data_classification: public
+    egress: true
+    deprecated: true
 
 # Remote (HTTP/SSE) MCP servers, matched on hostname.
 remote_hosts:

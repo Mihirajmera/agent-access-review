@@ -350,6 +350,8 @@ def _grant_from_profile(name: str, profile: dict | None, resource: str, args: li
         data_classification=profile.get('data_classification', 'internal'),
         untrusted_input=profile.get('untrusted_input', False),
         egress=profile.get('egress', False),
+        deprecated=profile.get('deprecated', False),
+        replacement=profile.get('replacement'),
     )
 
 
@@ -440,6 +442,8 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
             raw=copy.deepcopy(rec),
         )
         for t in rec.get('tools', []):
+            # A manifest rarely says a server is deprecated; the catalog knows it by package name.
+            upstream = SERVERS.get(t.get('package')) or {}
             agent.grants.append(Grant(
                 tool=t['name'],
                 resource=t.get('resource', t['name']),
@@ -455,6 +459,8 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
                 pinned=t.get('pinned'),
                 endpoint=t.get('endpoint'),
                 category=t.get('type'),
+                deprecated=_as_bool(t.get('deprecated', upstream.get('deprecated', False)), unknown=False),
+                replacement=t.get('replacement', upstream.get('replacement')),
             ))
         for c in rec.get('credentials', []):
             agent.credentials.append(Credential(

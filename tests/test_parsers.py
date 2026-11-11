@@ -409,3 +409,17 @@ def test_a_url_secret_raises_a_hardcoded_credential_finding(write_json):
     [agent] = load(write_json('mcp.json', {
         'mcpServers': {'remote': {'url': 'https://mcp.example.com/sse?api_key=sk-live-abc123'}}}))
     assert 'AAR-06' in {f.check_id for f in run_all(agent, date(2026, 10, 12))}
+
+
+def test_deprecated_reference_servers_carry_their_replacement(tmp_path):
+    """The archived reference servers are flagged by package, Docker image and manifest alike."""
+    cfg = tmp_path / 'claude_desktop_config.json'
+    cfg.write_text(json.dumps({'mcpServers': {
+        'gh': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-github@2025.4.8']},
+        'kv': {'command': 'docker', 'args': ['run', '-i', '--rm', 'mcp/redis', 'redis://host:6379']},
+        'fs': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-filesystem@2025.8.21', '/tmp']},
+    }}), encoding='utf-8')
+    g = {x.tool: x for x in load(cfg)[0].grants}
+    assert g['gh'].deprecated and g['gh'].replacement == 'ghcr.io/github/github-mcp-server'
+    assert g['kv'].deprecated and g['kv'].replacement == 'redis-mcp-server'
+    assert not g['fs'].deprecated

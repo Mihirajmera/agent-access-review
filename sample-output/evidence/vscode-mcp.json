@@ -25,12 +25,14 @@
         ],
         "category": "github",
         "data_classification": "confidential",
+        "deprecated": false,
         "egress": true,
         "endpoint": "https://api.githubcopilot.com/mcp/",
         "known": true,
         "last_used": null,
         "package": null,
         "pinned": null,
+        "replacement": null,
         "requires_approval": false,
         "resource": "https://api.githubcopilot.com/mcp/",
         "sandboxed": false,
@@ -44,12 +46,14 @@
         ],
         "category": null,
         "data_classification": "internal",
+        "deprecated": false,
         "egress": false,
         "endpoint": "http://mcp.tools.example.com/jira",
         "known": false,
         "last_used": null,
         "package": null,
         "pinned": null,
+        "replacement": null,
         "requires_approval": false,
         "resource": "http://mcp.tools.example.com/jira",
         "sandboxed": false,
@@ -216,10 +220,16 @@
       ],
       "status": "FAIL",
       "title": "Every tool's capabilities are inventoried"
+    },
+    {
+      "check_id": "AAR-13",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool servers are still maintained upstream"
     }
   ],
   "review_as_of": "2026-10-12",
-  "sha256": "7be1e8fe98ff49055d4e3bd463c8b57a78b940cad2c3bd842602e0970a2adcdf",
+  "sha256": "f3cff3df3ac8ea5ae07859e88a22d11e03c722e88b53cfe91d34b88840cb9bdf",
   "source": "examples/vscode-mcp.json",
   "source_record": {
     "servers": {

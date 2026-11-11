@@ -19,12 +19,14 @@
         ],
         "category": "shell",
         "data_classification": "confidential",
+        "deprecated": false,
         "egress": false,
         "endpoint": null,
         "known": true,
         "last_used": null,
         "package": null,
         "pinned": null,
+        "replacement": null,
         "requires_approval": false,
         "resource": "build-runner-07",
         "sandboxed": false,
@@ -39,12 +41,14 @@
         ],
         "category": "source-control",
         "data_classification": "confidential",
+        "deprecated": false,
         "egress": false,
         "endpoint": null,
         "known": true,
         "last_used": null,
         "package": "@acme/github-tools",
         "pinned": false,
+        "replacement": null,
         "requires_approval": false,
         "resource": "github:acme-corp",
         "sandboxed": false,
@@ -205,10 +209,16 @@
       "findings": [],
       "status": "PASS",
       "title": "Every tool's capabilities are inventoried"
+    },
+    {
+      "check_id": "AAR-13",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool servers are still maintained upstream"
     }
   ],
   "review_as_of": "2026-10-12",
-  "sha256": "ea02c9577a756cc298578662deaa208d3e355cc13f89d9b3a5e9429359120e17",
+  "sha256": "ae079942824c8bc401fa264cf5bca0aef12ab38d28b4daaf61f7ce29f8dad6f9",
   "source": "examples/agents.yaml",
   "source_record": {
     "credentials": [

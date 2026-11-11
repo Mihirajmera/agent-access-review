@@ -222,3 +222,19 @@ def capability_inventory(agent: Agent, as_of: date) -> list[Finding]:
                     'Document what the tool can read, write and send, and add it to catalog.yaml.',
                     tool=g.tool)
             for g in agent.grants if not g.known]
+
+
+@check('AAR-13')
+def maintained_servers(agent: Agent, as_of: date) -> list[Finding]:
+    out = []
+    for g in agent.grants:
+        if not g.deprecated:
+            continue
+        fix = (f'Move to {g.replacement}, then remove this server.' if g.replacement else
+               'No maintained replacement is listed: find one, or remove this server and record '
+               'the decision.')
+        out.append(Finding('AAR-13', 'high', agent.id,
+                           f'{g.tool} runs {g.package or g.resource}, which is deprecated or archived '
+                           f'upstream and no longer receives security fixes.',
+                           fix, tool=g.tool))
+    return out
