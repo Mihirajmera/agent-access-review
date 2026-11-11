@@ -13,6 +13,7 @@ names = set(zipfile.ZipFile(wheel).namelist())
 required = {
     'agent_access_review/catalog.yaml',
     'agent_access_review/controls.yaml',
+    'agent_access_review/advisories.yaml',
     'agent_access_review/examples/agents.yaml',
     'agent_access_review/examples/claude_desktop_config.json',
     'agent_access_review/examples/vscode-mcp.json',

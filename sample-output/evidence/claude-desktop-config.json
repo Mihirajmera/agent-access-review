@@ -32,6 +32,7 @@
         "category": "filesystem",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": "npm",
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -46,7 +47,8 @@
           "/Users/dev"
         ],
         "tool": "filesystem",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
       },
       {
         "actions": [
@@ -56,6 +58,7 @@
         "category": "github",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": null,
         "egress": true,
         "endpoint": null,
         "known": true,
@@ -68,7 +71,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "github",
-        "untrusted_input": true
+        "untrusted_input": true,
+        "version": null
       },
       {
         "actions": [
@@ -77,6 +81,7 @@
         "category": "fetch",
         "data_classification": "public",
         "deprecated": false,
+        "ecosystem": "PyPI",
         "egress": true,
         "endpoint": null,
         "known": true,
@@ -89,7 +94,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "fetch",
-        "untrusted_input": true
+        "untrusted_input": true,
+        "version": null
       },
       {
         "actions": [
@@ -98,6 +104,7 @@
         "category": "postgres",
         "data_classification": "restricted",
         "deprecated": true,
+        "ecosystem": "npm",
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -110,7 +117,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "customers-db",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": "0.6.2"
       },
       {
         "actions": [
@@ -122,6 +130,7 @@
         "category": "shell",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": "npm",
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -134,7 +143,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "terminal",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
       },
       {
         "actions": [
@@ -143,6 +153,7 @@
         "category": null,
         "data_classification": "internal",
         "deprecated": false,
+        "ecosystem": null,
         "egress": false,
         "endpoint": null,
         "known": false,
@@ -155,7 +166,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "internal-crm",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
       }
     ],
     "id": "claude-desktop-config",
@@ -397,10 +409,16 @@
       ],
       "status": "FAIL",
       "title": "Tool servers are still maintained upstream"
+    },
+    {
+      "check_id": "AAR-14",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool servers have no known vulnerabilities"
     }
   ],
   "review_as_of": "2026-10-12",
-  "sha256": "73da979da5a01e945663b7697c01a39038366a24c4f347439a03c5b50eeb6ecf",
+  "sha256": "c66e5b2c081095ab0904c43a1ccc8d12022962daebb282369207ad5989f2aa53",
   "source": "examples/claude_desktop_config.json",
   "source_record": {
     "mcpServers": {

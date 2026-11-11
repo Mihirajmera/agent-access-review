@@ -20,6 +20,7 @@
         "category": "shell",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": null,
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -32,7 +33,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "shell",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
       },
       {
         "actions": [
@@ -42,6 +44,7 @@
         "category": "source-control",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": null,
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -56,7 +59,8 @@
           "repo"
         ],
         "tool": "github",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
       }
     ],
     "id": "devops-agent",
@@ -215,10 +219,16 @@
       "findings": [],
       "status": "PASS",
       "title": "Tool servers are still maintained upstream"
+    },
+    {
+      "check_id": "AAR-14",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool servers have no known vulnerabilities"
     }
   ],
   "review_as_of": "2026-10-12",
-  "sha256": "ae079942824c8bc401fa264cf5bca0aef12ab38d28b4daaf61f7ce29f8dad6f9",
+  "sha256": "36fe6d2a99d28c1fac14202b84c71b2e008a7b3d1cc4666860b49e0b6f2c2800",
   "source": "examples/agents.yaml",
   "source_record": {
     "credentials": [

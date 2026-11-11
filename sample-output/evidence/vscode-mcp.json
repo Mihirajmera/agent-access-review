@@ -26,6 +26,7 @@
         "category": "github",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": null,
         "egress": true,
         "endpoint": "https://api.githubcopilot.com/mcp/",
         "known": true,
@@ -38,7 +39,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "github",
-        "untrusted_input": true
+        "untrusted_input": true,
+        "version": null
       },
       {
         "actions": [
@@ -47,6 +49,7 @@
         "category": null,
         "data_classification": "internal",
         "deprecated": false,
+        "ecosystem": null,
         "egress": false,
         "endpoint": "http://mcp.tools.example.com/jira",
         "known": false,
@@ -59,7 +62,34 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "jira",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
+      },
+      {
+        "actions": [
+          "read",
+          "write"
+        ],
+        "category": "git",
+        "data_classification": "confidential",
+        "deprecated": false,
+        "ecosystem": "PyPI",
+        "egress": false,
+        "endpoint": null,
+        "known": true,
+        "last_used": null,
+        "package": "mcp-server-git",
+        "pinned": true,
+        "replacement": null,
+        "requires_approval": false,
+        "resource": "${workspaceFolder}",
+        "sandboxed": false,
+        "scopes": [
+          "${workspaceFolder}"
+        ],
+        "tool": "git",
+        "untrusted_input": false,
+        "version": "2025.7.1"
       }
     ],
     "id": "vscode-mcp",
@@ -109,6 +139,14 @@
           "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
           "severity": "high",
           "tool": "github"
+        },
+        {
+          "agent_id": "vscode-mcp",
+          "check_id": "AAR-03",
+          "message": "git can write confidential data without a human approving each action.",
+          "recommendation": "Require human confirmation for these actions, or reduce the tool to read-only.",
+          "severity": "high",
+          "tool": "git"
         }
       ],
       "status": "FAIL",
@@ -176,7 +214,7 @@
         {
           "agent_id": "vscode-mcp",
           "check_id": "AAR-09",
-          "message": "Exfiltration path: reads sensitive data (github), ingests untrusted content (github) and can send data out (github) with no human approval. A prompt injection in the untrusted content could leak the data.",
+          "message": "Exfiltration path: reads sensitive data (git, github), ingests untrusted content (github) and can send data out (github) with no human approval. A prompt injection in the untrusted content could leak the data.",
           "recommendation": "Break the chain: split the agent, remove one leg, or require approval on every egress action.",
           "severity": "high",
           "tool": null
@@ -226,13 +264,37 @@
       "findings": [],
       "status": "PASS",
       "title": "Tool servers are still maintained upstream"
+    },
+    {
+      "check_id": "AAR-14",
+      "findings": [
+        {
+          "agent_id": "vscode-mcp",
+          "check_id": "AAR-14",
+          "message": "git runs mcp-server-git 2025.7.1, which has 4 known vulnerabilities (CVE-2025-68143, CVE-2025-68144, CVE-2025-68145, CVE-2026-27735).",
+          "recommendation": "Upgrade to 2026.1.14 or later and pin it.",
+          "severity": "medium",
+          "tool": "git"
+        }
+      ],
+      "status": "FAIL",
+      "title": "Tool servers have no known vulnerabilities"
     }
   ],
   "review_as_of": "2026-10-12",
-  "sha256": "f3cff3df3ac8ea5ae07859e88a22d11e03c722e88b53cfe91d34b88840cb9bdf",
+  "sha256": "a0bfa988e24624cc628c22292ea037064b5f37ff3b30808519f8b132921e8a56",
   "source": "examples/vscode-mcp.json",
   "source_record": {
     "servers": {
+      "git": {
+        "args": [
+          "mcp-server-git==2025.7.1",
+          "--repository",
+          "${workspaceFolder}"
+        ],
+        "command": "uvx",
+        "type": "stdio"
+      },
       "github": {
         "headers": {
           "Authorization": "Bearer ${input:github-token}"
