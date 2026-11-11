@@ -1,2 +1,0 @@
-[console_scripts]
-agent-access-review = agent_access_review.__main__:main

@@ -25,7 +25,7 @@ def packages() -> list[tuple[str, str]]:
     out = []
     for name, profile in servers.items():
         for n in [name, *profile.get('aliases', [])]:
-            if '/' in n and not n.startswith('@') or n.startswith('ghcr.io'):
+            if '/' in n and not n.startswith('@'):
                 continue                     # a container image, not a package
             # Unscoped names can exist on both registries -- sometimes as different software.
             out += [('npm', n)] if n.startswith('@') else [('PyPI', n), ('npm', n)]
