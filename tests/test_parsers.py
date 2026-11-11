@@ -423,3 +423,18 @@ def test_deprecated_reference_servers_carry_their_replacement(tmp_path):
     assert g['gh'].deprecated and g['gh'].replacement == 'ghcr.io/github/github-mcp-server'
     assert g['kv'].deprecated and g['kv'].replacement == 'redis-mcp-server'
     assert not g['fs'].deprecated
+
+
+def test_registry_and_exact_version_are_recorded(tmp_path):
+    cfg = tmp_path / 'claude_desktop_config.json'
+    cfg.write_text(json.dumps({'mcpServers': {
+        'fs': {'command': 'npx', 'args': ['-y', '@modelcontextprotocol/server-filesystem@2025.3.28', '/tmp']},
+        'git': {'command': 'uvx', 'args': ['mcp-server-git==2025.9.25', '--repository', '/repo']},
+        'fetch': {'command': 'npx', 'args': ['-y', 'mcp-server-fetch']},
+        'img': {'command': 'docker', 'args': ['run', '-i', 'mcp/fetch@sha256:' + 'a' * 64]},
+    }}), encoding='utf-8')
+    g = {x.tool: x for x in load(cfg)[0].grants}
+    assert (g['fs'].ecosystem, g['fs'].version) == ('npm', '2025.3.28')
+    assert (g['git'].ecosystem, g['git'].version) == ('PyPI', '2025.9.25')
+    assert (g['fetch'].ecosystem, g['fetch'].version) == ('npm', None)
+    assert (g['img'].ecosystem, g['img'].version) == (None, None)

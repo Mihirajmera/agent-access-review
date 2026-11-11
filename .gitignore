@@ -4,3 +4,4 @@ __pycache__/
 # Review output: regenerate with the scan command
 review/
 dist/
+*.egg-info/

@@ -82,6 +82,7 @@ Agents are non-human identities. They need the same joiner/mover/leaver and rece
 | AAR-11 | Remote MCP servers use HTTPS | high | SC-8 · CC6.7 |
 | AAR-12 | Every tool's capabilities are inventoried | medium | CM-8 · AI RMF GOVERN 1.6 |
 | AAR-13 | No deprecated or archived MCP servers (names the maintained replacement) | high | SA-22, SI-2 · CC7.1 · LLM03 |
+| AAR-14 | No MCP server versions with known vulnerabilities, and no packages published as malware (from an [OSV](https://osv.dev) snapshot) | high / medium / low | RA-5, SI-2 · CC7.1 · LLM03 |
 
 Each control is defined once in [`controls.yaml`](agent_access_review/controls.yaml) and cross-walked to every framework, so one test produces evidence for all of them. The mappings are my own judgment and should be checked against official crosswalks before being relied on in a real audit.
 
@@ -129,7 +130,7 @@ flowchart LR
         P["Parsers<br/>secrets redacted here"]
         K[("Capability catalog<br/>catalog.yaml")]
         I["Normalized inventory<br/>agent → grants + credentials"]
-        X["13 checks<br/>AAR-01 … AAR-13"]
+        X["14 checks<br/>AAR-01 … AAR-14"]
         M[("Control catalog<br/>controls.yaml")]
     end
     subgraph OUT["📤 Audit outputs"]
@@ -205,16 +206,16 @@ support-copilot                  2     0     0     0
 finance-ops-agent                4     4     3     0
 devops-agent                     2     6     1     1
 claude-desktop-config            6    12     5     1
-vscode-mcp                       2     5     1     3
+vscode-mcp                       3     6     2     3
 ```
 
-**5 agents · 16 tool grants · 42 findings**
+**5 agents · 17 tool grants · 44 findings**
 
 ```mermaid
 %%{init: {"themeVariables": {"pie1": "#dc2626", "pie2": "#f59e0b", "pie3": "#16a34a", "pieSectionTextColor": "#ffffff", "pieStrokeColor": "#ffffff"}}}%%
 pie showData title Findings by severity
-    "High" : 27
-    "Medium" : 10
+    "High" : 28
+    "Medium" : 11
     "Low" : 5
 ```
 
@@ -227,7 +228,7 @@ pie showData title Findings by severity
 | AAR-04 · Least privilege | 3 / 5 |
 | AAR-09 · No exfiltration path | 3 / 5 |
 | AAR-05, 06, 07, 10, 12 | 2 / 5 each |
-| AAR-11, 13 | 1 / 5 each |
+| AAR-11, 13, 14 | 1 / 5 each |
 
 <details>
 <summary><b>Excerpt from the reviewer packet: finance-ops-agent</b></summary>

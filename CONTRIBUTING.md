@@ -30,5 +30,6 @@ pytest -q
 ```
 
 - Every new check needs tests for the passing and failing case, and an entry in `controls.yaml` with its framework mappings.
+- To refresh the vulnerability data AAR-14 uses, run `python scripts/update_advisories.py` and commit `agent_access_review/advisories.yaml` together with the regenerated sample.
 - If your change alters the report, regenerate the sample: `SOURCE_DATE_EPOCH=1791763200 python -m agent_access_review demo --out sample-output`. CI fails if `sample-output/` is stale.
 - Security issues: please follow [SECURITY.md](SECURITY.md) instead of opening a public issue.

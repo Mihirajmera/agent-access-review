@@ -15,3 +15,4 @@ claude-desktop-config,MCP host (claude_desktop_config.json),,terminal,shell,'@wo
 claude-desktop-config,MCP host (claude_desktop_config.json),,internal-crm,,python /opt/tools/crm_server.py --api-key=***REDACTED***,unknown,internal,False,False,AAR-06 AAR-12,Investigate,,,
 vscode-mcp,MCP host (vscode-mcp.json),,github,github,https://api.githubcopilot.com/mcp/,read write,confidential,True,True,AAR-03 AAR-07,Modify,,,
 vscode-mcp,MCP host (vscode-mcp.json),,jira,,http://mcp.tools.example.com/jira,unknown,internal,False,False,AAR-07 AAR-11 AAR-12,Investigate,,,
+vscode-mcp,MCP host (vscode-mcp.json),,git,git,${workspaceFolder},read write,confidential,False,False,AAR-03 AAR-14,Modify,,,

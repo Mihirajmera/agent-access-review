@@ -6,5 +6,6 @@ pip3 install --require-hashes -r .clusterfuzzlite/requirements.txt
 for fuzzer in $(find "$SRC/agent-access-review/fuzz" -name 'fuzz_*.py'); do
   compile_python_fuzzer "$fuzzer" --paths "$SRC/agent-access-review" \
     --add-data "agent_access_review/catalog.yaml:agent_access_review" \
-    --add-data "agent_access_review/controls.yaml:agent_access_review"
+    --add-data "agent_access_review/controls.yaml:agent_access_review" \
+    --add-data "agent_access_review/advisories.yaml:agent_access_review"
 done

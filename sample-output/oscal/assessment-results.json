@@ -43,6 +43,9 @@
                   "control-id": "ia-5"
                 },
                 {
+                  "control-id": "ra-5"
+                },
+                {
                   "control-id": "sa-22"
                 },
                 {
@@ -83,7 +86,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "6da1dad565265adb94476fc1de816537b5b3a78c61779a4de0ccbc6f73cc4069"
+                    "value": "a36f6c6dac3a3160458099e388441202e724c312186733c2ed0ecf9d39bb4857"
                   }
                 ]
               }
@@ -114,7 +117,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "a2977c142ace3bdf4bf73bb47490f467f0c934fb81b56652a2692b1af97f9538"
+                    "value": "408c88220a34b7e17a0b51e6e232b4f0ff638bc57f3d8e6892ab82cc499c3e19"
                   }
                 ]
               }
@@ -145,7 +148,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "ae079942824c8bc401fa264cf5bca0aef12ab38d28b4daaf61f7ce29f8dad6f9"
+                    "value": "36fe6d2a99d28c1fac14202b84c71b2e008a7b3d1cc4666860b49e0b6f2c2800"
                   }
                 ]
               }
@@ -176,7 +179,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "73da979da5a01e945663b7697c01a39038366a24c4f347439a03c5b50eeb6ecf"
+                    "value": "c66e5b2c081095ab0904c43a1ccc8d12022962daebb282369207ad5989f2aa53"
                   }
                 ]
               }
@@ -186,7 +189,7 @@
           {
             "uuid": "6374d630-d029-599d-99cf-e09a14a0b1c0",
             "title": "Access review of MCP host (vscode-mcp.json)",
-            "description": "2 tool grants, 9 findings.",
+            "description": "3 tool grants, 11 findings.",
             "methods": [
               "EXAMINE"
             ],
@@ -207,7 +210,7 @@
                 "props": [
                   {
                     "name": "sha256",
-                    "value": "f3cff3df3ac8ea5ae07859e88a22d11e03c722e88b53cfe91d34b88840cb9bdf"
+                    "value": "a0bfa988e24624cc628c22292ea037064b5f37ff3b30808519f8b132921e8a56"
                   }
                 ]
               }
@@ -384,6 +387,23 @@
             ]
           },
           {
+            "uuid": "1bb8ae8f-eb85-5211-97ff-183143941bd6",
+            "title": "RA-5: AAR-14",
+            "description": "Tool servers have no known vulnerabilities",
+            "target": {
+              "type": "objective-id",
+              "target-id": "ra-5",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "6374d630-d029-599d-99cf-e09a14a0b1c0"
+              }
+            ]
+          },
+          {
             "uuid": "9110dfff-d068-5a88-81ad-89f781721748",
             "title": "SA-22: AAR-13",
             "description": "Tool servers are still maintained upstream",
@@ -419,8 +439,8 @@
           },
           {
             "uuid": "830ed940-d94c-5e3c-9982-bf4157b7eeb0",
-            "title": "SI-2: AAR-13",
-            "description": "Tool servers are still maintained upstream",
+            "title": "SI-2: AAR-13, AAR-14",
+            "description": "Tool servers are still maintained upstream; Tool servers have no known vulnerabilities",
             "target": {
               "type": "objective-id",
               "target-id": "si-2",
@@ -431,6 +451,9 @@
             "related-observations": [
               {
                 "observation-uuid": "2582ddd8-5db1-5213-a42e-3a3e0a861c1c"
+              },
+              {
+                "observation-uuid": "6374d630-d029-599d-99cf-e09a14a0b1c0"
               }
             ]
           },

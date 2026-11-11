@@ -1,6 +1,6 @@
 # AI Agent Access Review: 2026-10-12
 
-**5 agents**, **16 tool grants**, **42 findings** (27 high, 10 medium, 5 low).
+**5 agents**, **17 tool grants**, **44 findings** (28 high, 11 medium, 5 low).
 
 ## Agents
 
@@ -10,7 +10,7 @@
 | [Finance Ops Agent](#finance-ops-agent) | `agents.yaml` | marco.diaz@example.com | 2026-03-10 by cfo-office | 4 | 4 | 3 | 0 |
 | [DevOps Auto-Remediation Agent](#devops-agent) | `agents.yaml` | **none** | **none** | 2 | 6 | 1 | 1 |
 | [MCP host (claude_desktop_config.json)](#claude-desktop-config) | `claude_desktop_config.json` | **none** | **none** | 6 | 12 | 5 | 1 |
-| [MCP host (vscode-mcp.json)](#vscode-mcp) | `vscode-mcp.json` | **none** | **none** | 2 | 5 | 1 | 3 |
+| [MCP host (vscode-mcp.json)](#vscode-mcp) | `vscode-mcp.json` | **none** | **none** | 3 | 6 | 2 | 3 |
 
 ## Control results
 
@@ -29,6 +29,7 @@
 | AAR-11 | Remote tools use encrypted transport | 1 / 5 | NIST 800-53 SC-8; SOC 2 CC6.7 |
 | AAR-12 | Every tool's capabilities are inventoried | 2 / 5 | NIST 800-53 CM-8; NIST AI RMF GOVERN 1.6 |
 | AAR-13 | Tool servers are still maintained upstream | 1 / 5 | NIST 800-53 SA-22, SI-2; SOC 2 CC7.1; OWASP LLM LLM03 |
+| AAR-14 | Tool servers have no known vulnerabilities | 1 / 5 | NIST 800-53 RA-5, SI-2; SOC 2 CC7.1; OWASP LLM LLM03 |
 
 ---
 
@@ -39,7 +40,7 @@
 - **Source:** `examples/agents.yaml`
 - **Owner:** priya.shah@example.com
 - **Approval:** ai-review-board on 2026-08-20
-- **Evidence:** `evidence/support-copilot.json` (sha256 `6da1dad565265adb…`)
+- **Evidence:** `evidence/support-copilot.json` (sha256 `a36f6c6dac3a3160…`)
 
 ### Access inventory
 
@@ -70,7 +71,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/agents.yaml`
 - **Owner:** marco.diaz@example.com
 - **Approval:** cfo-office on 2026-03-10
-- **Evidence:** `evidence/finance-ops-agent.json` (sha256 `a2977c142ace3bdf…`)
+- **Evidence:** `evidence/finance-ops-agent.json` (sha256 `408c88220a34b7e1…`)
 
 ### Access inventory
 
@@ -111,7 +112,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/agents.yaml`
 - **Owner:** none recorded
 - **Approval:** none recorded
-- **Evidence:** `evidence/devops-agent.json` (sha256 `ae079942824c8bc4…`)
+- **Evidence:** `evidence/devops-agent.json` (sha256 `36fe6d2a99d28c1f…`)
 
 ### Access inventory
 
@@ -151,7 +152,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/claude_desktop_config.json`
 - **Owner:** none recorded
 - **Approval:** none recorded
-- **Evidence:** `evidence/claude-desktop-config.json` (sha256 `73da979da5a01e94…`)
+- **Evidence:** `evidence/claude-desktop-config.json` (sha256 `c66e5b2c081095ab…`)
 
 ### Access inventory
 
@@ -205,7 +206,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 - **Source:** `examples/vscode-mcp.json`
 - **Owner:** none recorded
 - **Approval:** none recorded
-- **Evidence:** `evidence/vscode-mcp.json` (sha256 `f3cff3df3ac8ea5a…`)
+- **Evidence:** `evidence/vscode-mcp.json` (sha256 `a0bfa988e24624cc…`)
 
 ### Access inventory
 
@@ -213,6 +214,7 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 |---|---|---|---|---|:---:|:---:|---|---|
 | github | github | `https://api.githubcopilot.com/mcp/` | read, write | confidential | yes | yes | **Modify** | ☐ Keep ☐ Modify ☐ Revoke |
 | jira | unknown | `http://mcp.tools.example.com/jira` | unknown | internal |  |  | **Investigate** | ☐ Keep ☐ Modify ☐ Revoke |
+| git | git | `${workspaceFolder}` | read, write | confidential |  |  | **Modify** | ☐ Keep ☐ Modify ☐ Revoke |
 
 ### Findings
 
@@ -221,9 +223,11 @@ I have reviewed each tool grant above and confirm the decisions recorded.
 | AAR-01 | high | (agent) | No accountable human owner is recorded for this agent. | Assign an owner who answers for what the agent does, or decommission it. |
 | AAR-02 | high | (agent) | Agent access has no recorded approval. | Route the agent through access approval before its next use. |
 | AAR-03 | high | github | github can write confidential data without a human approving each action. | Require human confirmation for these actions, or reduce the tool to read-only. |
-| AAR-09 | high | (agent) | Exfiltration path: reads sensitive data (github), ingests untrusted content (github) and can send data out (github) with no human approval. A prompt injection in the untrusted content could leak the data. | Break the chain: split the agent, remove one leg, or require approval on every egress action. |
+| AAR-03 | high | git | git can write confidential data without a human approving each action. | Require human confirmation for these actions, or reduce the tool to read-only. |
+| AAR-09 | high | (agent) | Exfiltration path: reads sensitive data (git, github), ingests untrusted content (github) and can send data out (github) with no human approval. A prompt injection in the untrusted content could leak the data. | Break the chain: split the agent, remove one leg, or require approval on every egress action. |
 | AAR-11 | high | jira | jira connects to http://mcp.tools.example.com/jira over unencrypted HTTP. | Use HTTPS so credentials and tool traffic are encrypted in transit. |
 | AAR-12 | medium | jira | jira (http://mcp.tools.example.com/jira) is not in the capability catalog, so its access cannot be assessed. | Document what the tool can read, write and send, and add it to catalog.yaml. |
+| AAR-14 | medium | git | git runs mcp-server-git 2025.7.1, which has 4 known vulnerabilities (CVE-2025-68143, CVE-2025-68144, CVE-2025-68145, CVE-2026-27735). | Upgrade to 2026.1.14 or later and pin it. |
 | AAR-07 | low | github | No rotation date is recorded for github.header.Authorization. | Record when the credential was issued so rotation can be evidenced. |
 | AAR-07 | low | jira | No rotation date is recorded for jira.header.Authorization. | Record when the credential was issued so rotation can be evidenced. |
 | AAR-08 | low | (agent) | No tool usage is logged, so dormant access cannot be identified. | Log tool calls per agent so unused access can be found and removed. |

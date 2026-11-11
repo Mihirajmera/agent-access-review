@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- New check `AAR-14`: a server pinned to a version with known vulnerabilities is reported with the advisories and the release that fixes them all. A package published as malware is reported at any version, with an instruction to rotate the agent's credentials. That matters for `mcp-server-fetch` and `mcp-server-git`: the real servers are PyPI packages run with `uvx`, but npm packages of the same names are flagged as malicious, so `npx mcp-server-fetch` runs malware. Advisories come from a bundled [OSV](https://osv.dev) snapshot, so scans stay offline and reproducible; `scripts/update_advisories.py` refreshes it. Each grant now records its registry (npm or PyPI) and exact version.
+- The VS Code example now runs `mcp-server-git` pinned to an old release, so the sample report shows AAR-14.
+
 ## 0.3.0 (2026-11-11)
 
 - New check `AAR-13`: an agent that runs a deprecated or archived MCP server is reported as high, with the maintained replacement when there is one. Most of the original reference servers (GitHub, Postgres, Slack, Puppeteer, Brave Search, Google Drive, Redis, Google Maps, GitLab, AWS KB Retrieval, EverArt) were archived in 2025 and their npm packages deprecated, but they still appear in many READMEs and configs. They no longer receive security fixes. The catalog now also classifies `redis`, `google-maps`, `gitlab`, `aws-kb-retrieval`, `everart` and the maintained Brave, Redis and Bedrock KB servers (#29).

@@ -21,6 +21,7 @@
         "category": "ticketing",
         "data_classification": "confidential",
         "deprecated": false,
+        "ecosystem": null,
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -33,7 +34,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "zendesk",
-        "untrusted_input": true
+        "untrusted_input": true,
+        "version": null
       },
       {
         "actions": [
@@ -42,6 +44,7 @@
         "category": "knowledge-base",
         "data_classification": "internal",
         "deprecated": false,
+        "ecosystem": null,
         "egress": false,
         "endpoint": null,
         "known": true,
@@ -54,7 +57,8 @@
         "sandboxed": false,
         "scopes": [],
         "tool": "kb-search",
-        "untrusted_input": false
+        "untrusted_input": false,
+        "version": null
       }
     ],
     "id": "support-copilot",
@@ -141,10 +145,16 @@
       "findings": [],
       "status": "PASS",
       "title": "Tool servers are still maintained upstream"
+    },
+    {
+      "check_id": "AAR-14",
+      "findings": [],
+      "status": "PASS",
+      "title": "Tool servers have no known vulnerabilities"
     }
   ],
   "review_as_of": "2026-10-12",
-  "sha256": "6da1dad565265adb94476fc1de816537b5b3a78c61779a4de0ccbc6f73cc4069",
+  "sha256": "a36f6c6dac3a3160458099e388441202e724c312186733c2ed0ecf9d39bb4857",
   "source": "examples/agents.yaml",
   "source_record": {
     "approved_by": "ai-review-board",

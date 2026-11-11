@@ -13,6 +13,7 @@ import yaml
 
 from .model import SENSITIVE_DATA, Agent, Finding
 
+ADVISORIES = yaml.safe_load((Path(__file__).parent / 'advisories.yaml').read_text(encoding='utf-8'))
 CONTROLS = yaml.safe_load((Path(__file__).parent / 'controls.yaml').read_text(encoding='utf-8'))['controls']
 
 RECERTIFY_DAYS = 90
@@ -238,3 +239,58 @@ def maintained_servers(agent: Agent, as_of: date) -> list[Finding]:
                            f'upstream and no longer receives security fixes.',
                            fix, tool=g.tool))
     return out
+
+
+def _vkey(version: str) -> tuple:
+    """Order release versions (npm semver, PyPI and calendar versions alike). A pre-release sorts
+    before its release, which is enough for advisory ranges."""
+    main, _, pre = re.split(r'[+]', version)[0].partition('-')
+    nums = tuple(int(n) for n in re.findall(r'\d+', main))
+    return nums + (0,) * (4 - len(nums)), 0 if (pre or re.search(r'[a-z]', main, re.I)) else 1
+
+
+def _affected(version: str, r: dict) -> bool:
+    v = _vkey(version)
+    if r.get('introduced', '0') != '0' and v < _vkey(r['introduced']):
+        return False
+    if 'fixed' in r:
+        return v < _vkey(r['fixed'])
+    if 'last_affected' in r:
+        return v <= _vkey(r['last_affected'])
+    return True                                    # no fix published
+
+
+@check('AAR-14')
+def known_vulnerabilities(agent: Agent, as_of: date) -> list[Finding]:
+    out = []
+    for g in agent.grants:
+        if not g.ecosystem or not g.package:
+            continue
+        hits = []
+        for adv in ADVISORIES['packages'].get(f'{g.ecosystem}:{g.package}', []):
+            if adv.get('malicious'):
+                hits.append(adv)                   # every version: no pin makes it safe
+            elif g.version and any(_affected(g.version, r) for r in adv['ranges']):
+                hits.append(adv)
+        if not hits:
+            continue
+        ids = ', '.join(a.get('cve', a['id']) for a in hits)
+        if any(a.get('malicious') for a in hits):
+            out.append(Finding('AAR-14', 'high', agent.id,
+                               f'{g.tool} runs {g.package} from {g.ecosystem}, which is published as malicious '
+                               f'code ({ids}).',
+                               'Remove it now and rotate every credential this agent holds. If you meant the '
+                               'official server of that name, check which registry it is published on.',
+                               tool=g.tool))
+            continue
+        fixes = [r['fixed'] for a in hits for r in a['ranges'] if 'fixed' in r and _affected(g.version, r)]
+        worst = {a['severity'] for a in hits}
+        severity = 'high' if worst & {'critical', 'high'} else 'medium' if 'medium' in worst else 'low'
+        fix = (f'Upgrade to {max(fixes, key=_vkey)} or later and pin it.' if len(fixes) == len(hits) else
+               'At least one advisory has no fixed release: replace the server or accept the risk in writing.')
+        out.append(Finding('AAR-14', severity, agent.id,
+                           f'{g.tool} runs {g.package} {g.version}, which has {len(hits)} known '
+                           f'{"vulnerability" if len(hits) == 1 else "vulnerabilities"} ({ids}).',
+                           fix, tool=g.tool))
+    return out
+
