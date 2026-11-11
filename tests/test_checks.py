@@ -13,7 +13,7 @@ def test_governed_agent_passes_every_check(governed_agent, as_of):
 
 
 def test_every_control_has_a_check():
-    assert sorted(REGISTRY) == [f'AAR-{i:02d}' for i in range(1, 13)]
+    assert sorted(REGISTRY) == [f'AAR-{i:02d}' for i in range(1, 14)]
 
 
 def test_missing_owner(governed_agent, as_of):
@@ -138,3 +138,13 @@ def test_a_remote_host_cannot_hide_in_the_userinfo(governed_agent, as_of):
 def test_unclassified_tool(governed_agent, as_of):
     governed_agent.grants[0].known = False
     assert ids(run_all(governed_agent, as_of)) == ['AAR-12']
+
+
+def test_deprecated_server(governed_agent, as_of):
+    g = governed_agent.grants[0]
+    g.package, g.deprecated, g.replacement = '@modelcontextprotocol/server-github', True, 'ghcr.io/github/github-mcp-server'
+    findings = run_all(governed_agent, as_of)
+    assert ids(findings) == ['AAR-13']
+    assert 'ghcr.io/github/github-mcp-server' in findings[0].recommendation
+    g.replacement = None                                    # nothing to move to: still flagged
+    assert 'No maintained replacement' in run_all(governed_agent, as_of)[0].recommendation
