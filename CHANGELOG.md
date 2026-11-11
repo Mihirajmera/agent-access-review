@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: a placeholder such as `YOUR_API_KEY`, `<token>`, `xxxxxx` or `paste-key-here` in an `env` or header value is no longer reported as a hardcoded credential (AAR-06). Template configs ship these so users know what to fill in. In a scan of 428 public Claude Desktop configs, most of the values AAR-06 flagged were placeholders, which buried the few real-looking secrets. The match is deliberately narrow: a value that isn't obviously fake is still reported.
+
 ## 0.3.0 (2026-11-11)
 
 - New check `AAR-13`: an agent that runs a deprecated or archived MCP server is reported as high, with the maintained replacement when there is one. Most of the original reference servers (GitHub, Postgres, Slack, Puppeteer, Brave Search, Google Drive, Redis, Google Maps, GitLab, AWS KB Retrieval, EverArt) were archived in 2025 and their npm packages deprecated, but they still appear in many READMEs and configs. They no longer receive security fixes. The catalog now also classifies `redis`, `google-maps`, `gitlab`, `aws-kb-retrieval`, `everart` and the maintained Brave, Redis and Bedrock KB servers (#29).
