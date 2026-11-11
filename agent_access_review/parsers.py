@@ -51,6 +51,18 @@ def is_reference(value: str) -> bool:
             or (v.startswith('<') and v.endswith('>')))
 
 
+# Values a template ships so the user knows what to fill in. Deliberately narrow: anything not
+# clearly fake is still reported, since a missed secret costs more than a false alarm.
+PLACEHOLDER = re.compile(
+    r'your[\s_-]?\w*(key|token|secret|password|pat|id)|<[^>]+>|x{6,}|\.{3}|\*{3}|changeme|change[_-]me|'
+    r'placeholder|replace[_-]?(me|with)|insert[_-]?(your|here)|[_\s-]here$|^(?P<c>.)(?P=c){5,}$', re.I)
+
+
+def is_placeholder(value: str) -> bool:
+    """True for a value that is obviously not a real secret, such as `YOUR_API_KEY` or `<token>`."""
+    return bool(PLACEHOLDER.search(str(value).strip()))
+
+
 def secret_args(args: list[str]) -> list[tuple[int, str, str]]:
     """Every hardcoded secret passed on a command line, as (index of the value, flag name, value).
 
@@ -214,11 +226,13 @@ def _mcp_server(name: str, spec: dict) -> tuple[Grant, list[Credential]]:
     creds = []
     for key, value in (spec.get('env') or {}).items():
         if SECRET_NAME.search(key):
-            creds.append(Credential(name=f'{name}.{key}', hardcoded=not is_reference(value)))
+            creds.append(Credential(name=f'{name}.{key}',
+                                    hardcoded=not is_reference(value) and not is_placeholder(value)))
     for key, value in (spec.get('headers') or {}).items():
         if key.lower() in {'authorization', 'x-api-key', 'api-key'} or SECRET_NAME.search(key):
             token = str(value).split(' ', 1)[-1]      # strip "Bearer "
-            creds.append(Credential(name=f'{name}.header.{key}', hardcoded=not is_reference(token)))
+            creds.append(Credential(name=f'{name}.header.{key}',
+                                    hardcoded=not is_reference(token) and not is_placeholder(token)))
 
     url = spec.get('url')
     if url:                                           # remote server

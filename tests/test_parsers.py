@@ -438,3 +438,16 @@ def test_registry_and_exact_version_are_recorded(tmp_path):
     assert (g['git'].ecosystem, g['git'].version) == ('PyPI', '2025.9.25')
     assert (g['fetch'].ecosystem, g['fetch'].version) == ('npm', None)
     assert (g['img'].ecosystem, g['img'].version) == (None, None)
+@pytest.mark.parametrize('value,fake', [
+    ('YOUR_API_KEY', True), ('your-github-token-here', True), ('<token>', True), ('sk-xxxxxxxxxxxx', True),
+    ('changeme', True), ('replace_with_your_key', True), ('********', True), ('aaaaaaaa', True),
+    ('ghp_4fJ8kQ2mZ9xR7tL1vN3bC6dH0sW5yE8uP2aK', False), ('abcd1234efgh5678ijkl', False),
+    ('test-key-123456789012', False), ('12345678', False),
+])
+def test_placeholders_are_not_reported_as_secrets(tmp_path, value, fake):
+    """A template's `YOUR_API_KEY` isn't a leak; anything not obviously fake still is."""
+    cfg = tmp_path / 'claude_desktop_config.json'
+    cfg.write_text(json.dumps({'mcpServers': {'gh': {
+        'command': 'npx', 'args': ['-y', 'some-mcp@1.0.0'], 'env': {'GITHUB_TOKEN': value}}}}), encoding='utf-8')
+    [cred] = load(cfg)[0].credentials
+    assert cred.hardcoded is not fake

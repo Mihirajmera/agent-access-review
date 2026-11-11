@@ -4,6 +4,7 @@
 
 - New check `AAR-14`: a server pinned to a version with known vulnerabilities is reported with the advisories and the release that fixes them all. A package published as malware is reported at any version, with an instruction to rotate the agent's credentials. That matters for `mcp-server-fetch` and `mcp-server-git`: the real servers are PyPI packages run with `uvx`, but npm packages of the same names are flagged as malicious, so `npx mcp-server-fetch` runs malware. Advisories come from a bundled [OSV](https://osv.dev) snapshot, so scans stay offline and reproducible; `scripts/update_advisories.py` refreshes it. Each grant now records its registry (npm or PyPI) and exact version.
 - The VS Code example now runs `mcp-server-git` pinned to an old release, so the sample report shows AAR-14.
+- Fixed: a placeholder such as `YOUR_API_KEY`, `<token>`, `xxxxxx` or `paste-key-here` in an `env` or header value is no longer reported as a hardcoded credential (AAR-06). Template configs ship these so users know what to fill in. In a scan of 428 public Claude Desktop configs, most of the values AAR-06 flagged were placeholders, which buried the few real-looking secrets. The match is deliberately narrow: a value that isn't obviously fake is still reported.
 
 ## 0.3.0 (2026-11-11)
 
