@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-11-11)
 
 - New check `AAR-13`: an agent that runs a deprecated or archived MCP server is reported as high, with the maintained replacement when there is one. Most of the original reference servers (GitHub, Postgres, Slack, Puppeteer, Brave Search, Google Drive, Redis, Google Maps, GitLab, AWS KB Retrieval, EverArt) were archived in 2025 and their npm packages deprecated, but they still appear in many READMEs and configs. They no longer receive security fixes. The catalog now also classifies `redis`, `google-maps`, `gitlab`, `aws-kb-retrieval`, `everart` and the maintained Brave, Redis and Bedrock KB servers (#29).
 - VS Code `mcp.json` files with comments and trailing commas (JSONC) are now reviewed instead of skipped; malformed input is still rejected (#12, thanks @premsinghsodha7).
