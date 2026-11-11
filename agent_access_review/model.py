@@ -31,6 +31,8 @@ class Grant:
     category: str | None = None              # capability profile from catalog.yaml (filesystem, shell, ...)
     deprecated: bool = False                 # the package is deprecated or its repository archived
     replacement: str | None = None           # the maintained server to move to, when there is one
+    ecosystem: str | None = None             # npm | PyPI, when the server runs from a registry package
+    version: str | None = None               # the exact version it is pinned to, if any
 
     @property
     def privileged(self) -> set[str]:

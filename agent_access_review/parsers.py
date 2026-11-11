@@ -30,6 +30,7 @@ SERVERS = {alias: profile for name, profile in CATALOG['servers'].items()
            for alias in [name, *profile.get('aliases', [])]}
 
 REDACTED = '***REDACTED***'
+REGISTRY = {'npx': 'npm', 'bunx': 'npm', 'pnpx': 'npm', 'uvx': 'PyPI'}
 SECRET_NAME = re.compile(r'TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|CREDENTIAL|(^|_)PAT($|_)|AUTH', re.I)
 SECRET_FLAG = re.compile(r'^(--?[\w-]*(?:token|secret|password|api-?key)[\w-]*)=(.+)$', re.I)
 # The same flag on its own, with the secret in the next argument (`--token value`). Most CLIs
@@ -260,6 +261,11 @@ def _mcp_server(name: str, spec: dict) -> tuple[Grant, list[Credential]]:
     resource = package if pinned is not None else ' '.join([spec.get('command', name), *redact_args(raw_args)]).strip()
     grant = _grant_from_profile(name, profile, resource=resource, args=args)
     grant.package, grant.pinned = package, pinned
+    grant.ecosystem = REGISTRY.get(Path(spec.get('command', '')).name.lower().removesuffix('.cmd').removesuffix('.exe'))
+    if grant.ecosystem and pinned:
+        # _package() split "name@1.2.3" / "name==1.2.3"; read the version back from that argument.
+        spec_arg = next((a for a in raw_args if a.startswith(package) and a != package), None)
+        grant.version = spec_arg[len(package):].lstrip('@=').lstrip('v') if spec_arg else None
     mounts = _docker_mounts(spec.get('command', ''), [str(a) for a in spec.get('args', [])])
     if mounts and grant.known:
         # In a container the server only reaches what's mounted from the host, so the host
@@ -475,6 +481,8 @@ def parse_manifest(path: Path, data: dict, source: str | None = None) -> list[Ag
                 category=t.get('type'),
                 deprecated=_as_bool(t.get('deprecated', upstream.get('deprecated', False)), unknown=False),
                 replacement=t.get('replacement', upstream.get('replacement')),
+                ecosystem=t.get('ecosystem'),
+                version=str(t['version']) if t.get('version') is not None else None,
             ))
         for c in rec.get('credentials', []):
             agent.credentials.append(Credential(

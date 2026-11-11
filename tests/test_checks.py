@@ -13,7 +13,7 @@ def test_governed_agent_passes_every_check(governed_agent, as_of):
 
 
 def test_every_control_has_a_check():
-    assert sorted(REGISTRY) == [f'AAR-{i:02d}' for i in range(1, 14)]
+    assert sorted(REGISTRY) == [f'AAR-{i:02d}' for i in range(1, 15)]
 
 
 def test_missing_owner(governed_agent, as_of):
@@ -148,3 +148,25 @@ def test_deprecated_server(governed_agent, as_of):
     assert 'ghcr.io/github/github-mcp-server' in findings[0].recommendation
     g.replacement = None                                    # nothing to move to: still flagged
     assert 'No maintained replacement' in run_all(governed_agent, as_of)[0].recommendation
+
+
+def test_known_vulnerable_version(governed_agent, as_of):
+    g = governed_agent.grants[0]
+    g.ecosystem, g.package, g.version = 'npm', '@modelcontextprotocol/server-filesystem', '2025.3.28'
+    [f] = run_all(governed_agent, as_of)
+    assert f.check_id == 'AAR-14' and f.severity == 'high'
+    assert 'CVE-2025-53109' in f.message and 'Upgrade to 2025.7.1' in f.recommendation
+    g.version = '2025.7.1'                                  # the fixed release
+    assert run_all(governed_agent, as_of) == []
+    g.version = None                                        # unpinned: AAR-10's job, not this one
+    assert run_all(governed_agent, as_of) == []
+
+
+def test_malicious_package_is_flagged_at_any_version(governed_agent, as_of):
+    """mcp-server-fetch is a real server on PyPI; the npm package of the same name is malware."""
+    g = governed_agent.grants[0]
+    g.ecosystem, g.package, g.version = 'npm', 'mcp-server-fetch', None
+    [f] = run_all(governed_agent, as_of)
+    assert f.check_id == 'AAR-14' and 'malicious' in f.message and 'rotate' in f.recommendation
+    g.ecosystem = 'PyPI'
+    assert run_all(governed_agent, as_of) == []

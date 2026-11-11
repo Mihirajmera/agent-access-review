@@ -96,3 +96,10 @@ controls:
     soc2: [CC7.1]
     nist_ai_rmf: []
     owasp_llm: [LLM03]
+
+  AAR-14:
+    title: Tool servers have no known vulnerabilities
+    nist_800_53: [RA-5, SI-2]
+    soc2: [CC7.1]
+    nist_ai_rmf: []
+    owasp_llm: [LLM03]
