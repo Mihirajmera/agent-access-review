@@ -1,0 +1,36 @@
+by client (configs | unpinned servers | AAR-06 | AAR-10 | AAR-13 | AAR-14):
+  claude_desktop    762 |  96% of  464 |  9.4% | 25.7% |  2.8% |  0.1%
+  claude_code       652 |  91% of  435 |  4.6% | 31.9% |  2.6% |  0.0%
+  vscode            675 |  96% of  466 |  5.3% | 41.0% |  2.5% |  0.0%
+  cursor            741 |  95% of  555 | 14.2% | 38.2% |  3.2% |  0.0%
+search hits: 3250  unique configs: 2890  reviewed: 2830  no servers: 24  unreadable: 36
+by client: {'claude_desktop': 762, 'claude_code': 652, 'vscode': 675, 'cursor': 741}
+servers: 4896  registry/image servers: 1920  unpinned: 1822 (95%)
+
+configs failing each check:
+  AAR-04:     5  0.2%
+  AAR-05:     6  0.2%
+  AAR-06:   243  8.6%
+  AAR-09:   166  5.9%
+  AAR-10:   964  34.1%
+  AAR-11:    11  0.4%
+  AAR-13:    79  2.8%
+  AAR-14:     1  0.0%
+
+top packages: [('npm:@playwright/mcp', 142), ('npm:@upstash/context7-mcp', 101), ('npm:@modelcontextprotocol/server-filesystem', 83), ('npm:mcp-remote', 63), ('npm:@modelcontextprotocol/server-github', 55), ('npm:chrome-devtools-mcp', 54), ('npm:shadcn', 54), ('npm:@supabase/mcp-server-supabase', 43), ('npm:@modelcontextprotocol/server-memory', 41), ('npm:@modelcontextprotocol/server-sequential-thinking', 37), ('npm:task-master-ai', 25), ('npm:next-devtools-mcp', 24), ('npm:@modelcontextprotocol/server-postgres', 23), ('PyPI:git+https://github.com/oraios/serena', 22), ('docker:ghcr.io/github/github-mcp-server', 21), ('npm:tsx', 18), ('PyPI:mcp-server-git', 16), ('npm:@angular/cli', 15), ('npm:@smithery/cli', 13), ('npm:@modelcontextprotocol/server-puppeteer', 12), ('PyPI:mcp-server-fetch', 11), ('npm:@modelcontextprotocol/server-brave-search', 11), ('npm:@azure-devops/mcp', 11), ('npm:@executeautomation/playwright-mcp-server', 10), ('npm:@azure/mcp', 9)]
+
+deprecated servers (config count): [('@modelcontextprotocol/server-github', 55), ('@modelcontextprotocol/server-postgres', 23), ('@modelcontextprotocol/server-puppeteer', 12), ('@modelcontextprotocol/server-brave-search', 11), ('@modelcontextprotocol/server-slack', 7), ('mcp/postgres', 2), ('@modelcontextprotocol/server-google-maps', 2), ('@modelcontextprotocol/server-everart', 2), ('@modelcontextprotocol/server-gitlab', 1), ('@modelcontextprotocol/server-redis', 1)]
+
+known-vulnerable versions: [('mcp-remote 0.1.15', 1)]
+
+malicious packages: []
+
+unique configs: 2890
+configs with any credential-named value: 339 (11.7%)
+configs with a real-looking credential:   109 (3.8%)
+  placeholder or too short to be real: 484
+  other long value: 119
+  OpenAI/Anthropic key: 9
+  Slack token: 1
+  GitHub token: 1
+  Google API key: 1
