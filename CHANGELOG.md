@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- GitHub Action: `uses: Mihirajmera/agent-access-review@<tag>` reviews MCP configs and agent manifests in CI, puts the review packet in the job summary and fails the step on findings at or above `fail-on`. A repo with no configs gets a notice instead of a failure.
+
 ## 0.4.0 (2026-11-11)
 
 - New check `AAR-14`: a server pinned to a version with known vulnerabilities is reported with the advisories and the release that fixes them all. A package published as malware is reported at any version, with an instruction to rotate the agent's credentials. That matters for `mcp-server-fetch` and `mcp-server-git`: the real servers are PyPI packages run with `uvx`, but npm packages of the same names are flagged as malicious, so `npx mcp-server-fetch` runs malware. Advisories come from a bundled [OSV](https://osv.dev) snapshot, so scans stay offline and reproducible; `scripts/update_advisories.py` refreshes it. Each grant now records its registry (npm or PyPI) and exact version.

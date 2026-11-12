@@ -296,14 +296,27 @@ pytest -q
 
 ### As a CI gate
 
-Keep `agents.yaml` in the repo that deploys your agents, and block merges that introduce high-risk access:
+Keep your MCP configs and `agents.yaml` in the repo, and block pull requests that give an agent unpinned, archived, vulnerable or over-privileged access:
 
 ```yaml
-- run: pip install agent-access-review
-- run: agent-access-review scan agents.yaml --fail-on high
+# .github/workflows/agent-access.yml
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Mihirajmera/agent-access-review@v0.5.0   # or a commit SHA
+        with:
+          paths: .mcp.json .vscode/mcp.json agents.yaml   # files or folders; default "."
+          fail-on: high                                    # high | medium | low | never
 ```
 
-Pin to a release tag (or a commit SHA), not `main`, so a new version can't change your gate without review. That's control AAR-10 applied to this tool itself.
+The review packet goes into the job summary, and the step fails on findings at or above `fail-on`. A repo with no configs gets a notice instead of a failure. The `report` output holds the packet's path, so you can upload the folder (default `agent-access-review/`) as an artifact.
+
+Pin to a release tag or a commit SHA, not `main`, so a new version can't change your gate without review. That's control AAR-10 applied to this tool itself. Without the action, `pip install agent-access-review` and `agent-access-review scan … --fail-on high` do the same.
 
 ## Design decisions
 
