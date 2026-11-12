@@ -6,13 +6,13 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Mihirajmera/agent-access-review/badge)](https://scorecard.dev/viewer/?uri=github.com/Mihirajmera/agent-access-review)
 [![M8ven Score](https://m8ven.ai/badge/mcp/mihirajmera-agent-access-review-153tex?v=85668ed5e44ea66da691a76b634c576b)](https://m8ven.ai/mcp/mihirajmera-agent-access-review-153tex?s=readme)
 
-**User access reviews for AI agents.** It finds every agent and MCP server an organization runs, works out what each one can read, write, execute and send, tests that access against 12 controls, and produces the packet an auditor expects: a reviewer sign-off sheet, hashed evidence, and OSCAL assessment results mapped to NIST 800-53, SOC 2, NIST AI RMF and the OWASP Top 10 for LLM Applications.
+**User access reviews for AI agents.** Point it at MCP client configs (Claude Desktop, Claude Code, Cursor, VS Code) and agent manifests. It works out what each agent can read, write, execute and send, tests that access with 14 checks, and produces the packet an auditor expects: a reviewer sign-off sheet, hashed evidence, and OSCAL assessment results mapped to NIST 800-53, SOC 2, NIST AI RMF and the OWASP Top 10 for LLM Applications.
 
 > **In one sentence:** the quarterly "who has access to what?" review that companies already run for employees, applied to AI agents.
 
 ![agent-access-review demo: scanning five agents, then the AAR-09 exfiltration-path finding](docs/demo.gif)
 
-> **Real-world case study:** [what you get by copying the MCP configs from official READMEs](case-studies/official-mcp-readmes): 8 of 9 unpinned, 7 of 9 with unreviewed write/send/execute access, and an exfiltration path once they're combined.
+> **Case study: [2,830 public MCP configs, reviewed](case-studies/public-mcp-configs/).** 95% of package servers aren't pinned, 55 configs still run the archived GitHub server, about 1 in 26 holds a real-looking secret, and 166 give one agent a full exfiltration path. Also: [what the official MCP READMEs teach you to copy](case-studies/official-mcp-readmes).
 
 [![The sample report this tool produces, from sample-output/access-review.md](docs/report.png)](sample-output/access-review.md)
 
@@ -38,6 +38,14 @@ Then review your own setup:
 | Your own agents | an [`agents.yaml`](agent_access_review/examples/agents.yaml) you maintain | `agent-access-review scan agents.yaml` |
 
 Secrets in your configs are masked before anything is written, so the output is safe to share.
+
+Or gate pull requests with the [GitHub Action](#as-a-ci-gate), so no one adds a risky MCP server unreviewed:
+
+```yaml
+- uses: Mihirajmera/agent-access-review@v0.5.0
+  with:
+    fail-on: high
+```
 
 <details>
 <summary><b>New to this? Key terms in plain English</b></summary>
@@ -171,7 +179,7 @@ It's the same quarterly user access review that SOX and SOC 2 auditors already t
 ```mermaid
 flowchart LR
     D["1 · Discover<br/>configs + manifests"] --> C["2 · Classify<br/>capability catalog"]
-    C --> T["3 · Test<br/>12 controls"]
+    C --> T["3 · Test<br/>14 checks"]
     T --> R{"4 · Owner review<br/>per tool grant"}
     R -->|Keep| E["5 · Evidence<br/>hashed JSON + OSCAL"]
     R -->|"Modify / Revoke"| F["Remediate<br/>ticket + fix"]
@@ -328,9 +336,9 @@ Pin to a release tag or a commit SHA, not `main`, so a new version can't change 
 
 ## Limitations
 
-- It reviews **configuration**, not runtime behavior. It sees that an agent *can* send email, not what it actually sent. Usage dates come from the manifest, which in production would be fed from tool-call logs.
+- It reviews **configuration**, not runtime behavior. It sees that an agent *can* send email, not what it actually sent. Usage dates come from the manifest, which in production would be fed from tool-call logs. For runtime evidence, see [multiagent-flight-recorder](https://github.com/Mihirajmera/agent-flight-recorder), and [ai-assurance-demo](https://github.com/Mihirajmera/ai-assurance-demo) for both layers merged into one report.
 - The capability catalog is **approximate**: it describes what a server can do by default, and a token's real scopes (for example, a fine-grained GitHub PAT) can be narrower. The manifest format lets you record exact scopes.
-- JSON-with-comments configs are skipped with a warning.
+- A server that isn't in the catalog is reported as unclassified (AAR-12) rather than reviewed. The catalog grows with each release; adding a server is a [good first issue](https://github.com/Mihirajmera/agent-access-review/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ## What I'd do at enterprise scale
 
@@ -341,7 +349,9 @@ Pin to a release tag or a commit SHA, not `main`, so a new version can't change 
 
 ## Contributing
 
-The easiest way to help is to add an MCP server to the capability catalog: see [CONTRIBUTING.md](CONTRIBUTING.md). Changes are listed in the [CHANGELOG](CHANGELOG.md).
+The easiest way to help is to add an MCP server to the capability catalog. Each [good first issue](https://github.com/Mihirajmera/agent-access-review/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) has the exact change, a test to paste and the commands to check it, usually under 30 minutes. See [CONTRIBUTING.md](CONTRIBUTING.md); changes are listed in the [CHANGELOG](CHANGELOG.md).
+
+Found it useful, or found something it missed? [Open an issue](https://github.com/Mihirajmera/agent-access-review/issues/new/choose) or start a [discussion](https://github.com/Mihirajmera/agent-access-review/discussions). A star also helps other people find it.
 
 ## License
 
