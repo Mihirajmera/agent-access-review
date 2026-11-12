@@ -1,0 +1,94 @@
+# Governed agent manifest: one record per production agent, maintained by its owner.
+agents:
+  - id: support-copilot
+    name: Customer Support Copilot
+    framework: langchain
+    owner: priya.shah@example.com
+    approved_by: ai-review-board
+    approved_on: 2026-08-20
+    tools:
+      - name: zendesk
+        type: ticketing
+        resource: zendesk:tickets
+        actions: [read, write]
+        data_classification: confidential
+        untrusted_input: true          # customers write ticket text
+        requires_approval: true        # agent drafts, a human sends
+        last_used: 2026-10-11
+      - name: kb-search
+        type: knowledge-base
+        resource: confluence:space/SUPPORT
+        actions: [read]
+        data_classification: internal
+        last_used: 2026-10-11
+    credentials:
+      - name: ZENDESK_API_TOKEN
+        tool: zendesk
+        source: vault
+        last_rotated: 2026-08-01
+
+  - id: finance-ops-agent
+    name: Finance Ops Agent
+    framework: crewai
+    owner: marco.diaz@example.com
+    approved_by: cfo-office
+    approved_on: 2026-03-10
+    tools:
+      - name: netsuite
+        type: erp
+        resource: netsuite:vendor-bills
+        actions: [read, write]
+        data_classification: restricted
+        last_used: 2026-10-09
+      - name: outlook
+        type: email
+        resource: mailbox:ap@example.com
+        actions: [read, send]
+        data_classification: confidential
+        untrusted_input: true          # vendors email invoices
+        egress: true
+        last_used: 2026-10-10
+      - name: sharepoint
+        type: document-store
+        resource: sharepoint:finance
+        actions: [read]
+        scopes: [Sites.Read.All]
+        data_classification: confidential
+        last_used: 2026-10-01
+      - name: expense-ocr
+        type: ocr
+        resource: ocr-service:receipts
+        actions: [read]
+        data_classification: confidential
+        last_used: 2026-05-01
+    credentials:
+      - name: NETSUITE_TOKEN
+        tool: netsuite
+        source: env
+        last_rotated: 2025-12-01
+      - name: GRAPH_CLIENT_SECRET
+        tool: sharepoint
+        source: vault
+        last_rotated: 2026-09-15
+
+  - id: devops-agent
+    name: DevOps Auto-Remediation Agent
+    framework: custom
+    tools:
+      - name: shell
+        type: shell
+        resource: build-runner-07
+        actions: [execute]
+        data_classification: confidential
+      - name: github
+        type: source-control
+        resource: github:acme-corp
+        actions: [read, write]
+        scopes: [repo]
+        data_classification: confidential
+        package: "@acme/github-tools"
+        pinned: false
+    credentials:
+      - name: GITHUB_TOKEN
+        tool: github
+        source: hardcoded

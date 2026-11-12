@@ -1,0 +1,54 @@
+name: agent-access-review
+description: Access review for AI agents in CI. Fails a pull request that gives an agent unpinned, archived, vulnerable or over-privileged MCP servers.
+author: Mihir Ajmera
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  paths:
+    description: MCP config files, agents.yaml manifests or folders to review, separated by spaces.
+    default: '.'
+  fail-on:
+    description: Fail the step on findings at or above this severity (high, medium, low, never).
+    default: high
+  out:
+    description: Folder for the review packet (Markdown, CSV, hashed evidence, OSCAL).
+    default: agent-access-review
+
+outputs:
+  report:
+    description: Path of the Markdown review packet.
+    value: ${{ steps.scan.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: '3.12'
+    # Install the code at this action's ref, so @v0.4.0 runs exactly 0.4.0.
+    - run: python -m pip install --quiet "$GITHUB_ACTION_PATH"
+      shell: bash
+    - id: scan
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        OUT: ${{ inputs.out }}
+      run: |
+        set +e
+        # $PATHS is split on spaces on purpose: it's a list of paths.
+        agent-access-review scan $PATHS --out "$OUT" --fail-on "$FAIL_ON"
+        code=$?
+        set -e
+        if [ "$code" -eq 2 ]; then
+          echo "::notice::No MCP configs or agent manifests found in: $PATHS"
+          exit 0
+        fi
+        echo "report=$OUT/access-review.md" >> "$GITHUB_OUTPUT"
+        cat "$OUT/access-review.md" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$code" -ne 0 ]; then
+          echo "::error::agent-access-review found findings at or above '$FAIL_ON'. See the job summary."
+        fi
+        exit "$code"
