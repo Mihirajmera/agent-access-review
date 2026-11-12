@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 (2026-11-11)
 
 - GitHub Action: `uses: Mihirajmera/agent-access-review@<tag>` reviews MCP configs and agent manifests in CI, puts the review packet in the job summary and fails the step on findings at or above `fail-on`. A repo with no configs gets a notice instead of a failure.
 
