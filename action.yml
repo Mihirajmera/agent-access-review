@@ -1,5 +1,5 @@
 name: agent-access-review
-description: Access review for AI agents in CI. Fails a pull request that gives an agent unpinned, archived, vulnerable or over-privileged MCP servers.
+description: Access review for AI agents. Fails PRs that give an agent unpinned, archived, vulnerable or risky MCP servers.
 author: Mihir Ajmera
 branding:
   icon: shield
