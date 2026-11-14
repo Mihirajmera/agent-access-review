@@ -294,6 +294,21 @@ def test_catalog_classifies_sqlite_brave_gdrive(write_json):
     assert g['gdrive'].data_classification == 'confidential'
 
 
+def test_catalog_classifies_supabase(write_json):
+    # https://github.com/Mihirajmera/agent-access-review/issues/46
+    # It can run SQL and manage projects, so it must reach AAR-03/AAR-04 as a known, privileged
+    # server instead of falling through as unclassified (AAR-12).
+    cfg = write_json('mcp.json', {'mcpServers': {
+        'supabase': {'command': 'npx', 'args': ['-y', '@supabase/mcp-server-supabase', '--project-ref=abc']},
+    }})
+    [agent] = load(cfg)
+    [g] = agent.grants
+    assert g.known
+    assert g.category == 'supabase'
+    assert {'execute', 'admin'} <= g.actions
+    assert g.data_classification == 'restricted'
+
+
 def test_discover_reads_configs_saved_with_a_byte_order_mark(tmp_path, capsys):
     # Notepad and PowerShell's Out-File write a BOM by default on Windows, and the epilog
     # points Windows users straight at %APPDATA%\Claude\claude_desktop_config.json. json.loads
